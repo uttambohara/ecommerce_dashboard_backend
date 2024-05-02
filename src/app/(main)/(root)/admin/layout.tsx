@@ -1,5 +1,5 @@
-import AdminSidebar from "@/components/global/admin-sidebar";
-import Header from "@/components/global/header";
+import AdminSidebar from "@/components/layouts/admin-sidebar";
+import Header from "@/components/layouts/header";
 import React from "react";
 
 export default function MainLayout({

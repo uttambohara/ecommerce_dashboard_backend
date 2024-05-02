@@ -1,5 +1,5 @@
 import CreateProductDetails from "@/components/form/create-products-details";
-import MainHeader from "@/components/global/main-header";
+import MainHeader from "@/components/layouts/section-header";
 import {
   getAllCategoriesWithSubCategories,
   getAllImages,

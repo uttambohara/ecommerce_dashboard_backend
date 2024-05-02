@@ -14,7 +14,7 @@ interface MainHeaderProps {
   description?: string;
 }
 
-export default function MainHeader({ title }: MainHeaderProps) {
+export default function SectionHeader({ title }: MainHeaderProps) {
   //...
   const pathSegments = usePathname()
     .split("/")

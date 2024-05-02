@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { navItemsAdmin } from "@/lib/constant";
 import Link from "next/link";
-import Logo from "./logo";
+import Logo from "../logo";
 
 export default function AdminSidebar() {
   return (
