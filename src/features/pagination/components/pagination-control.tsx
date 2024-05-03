@@ -15,7 +15,6 @@ interface PaginationControlProps {
 export default function PaginationControl({
   route,
   totalProductLength,
-  totalPagesLoaded,
   hasPreviousPage,
   hasNextPage,
 }: PaginationControlProps) {

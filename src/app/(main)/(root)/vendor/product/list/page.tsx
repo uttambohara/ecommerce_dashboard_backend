@@ -19,21 +19,25 @@ export default async function ProductList({
   const userId = user?.data?.id;
 
   const search = searchParams["search"];
+
   // Pagination logic
   const page = searchParams["page"] ?? 1;
   const limit = searchParams["limit"] ?? PER_PAGE;
+  const sort = (searchParams["sort"] as string) ?? "name";
+  const order = searchParams["order"] ?? "asc";
+
   const start = (Number(page) - 1) * Number(limit);
-  const end = start + Number(limit);
+  const end = start + Number(limit) - 1;
 
   // ...
   const supabase = supabaseServerClient();
   let query = supabase
     .from("product")
     .select("*, category(*)")
+    .order(sort, { ascending: order === "asc" })
     .eq("user_id", userId as string)
-    .order("created_at", { ascending: false });
+    .limit(PER_PAGE);
 
-  // Calculation of total Products
   const { data: allProducts } = await query;
   const totalProducts = allProducts?.length;
 

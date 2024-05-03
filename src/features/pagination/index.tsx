@@ -14,7 +14,7 @@ export default async function Pagination({
   const page = searchParams["page"] ?? 1;
   const limit = searchParams["limit"] ?? PER_PAGE;
   const start = (Number(page) - 1) * Number(limit);
-  const end = start + Number(limit);
+  const end = start + Number(limit) - 1;
 
   // ...
   const supabase = supabaseServerClient();

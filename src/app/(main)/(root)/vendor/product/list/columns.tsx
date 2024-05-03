@@ -1,6 +1,7 @@
 "use client";
 
 import CustomModal from "@/components/global/custom-modal";
+import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,16 +17,11 @@ import { useModal } from "@/providers/modal-provider";
 import { ProductsWithCategory } from "@/types";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  Check,
-  Clock,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { ArrowUpDown, Check, Clock, MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export type Payment = Tables<"product">;
@@ -33,13 +29,8 @@ export type Payment = Tables<"product">;
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "name",
-    header: () => {
-      return (
-        <Button variant="ghost">
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Name" />;
     },
     cell: ({ row }) => {
       const rowData = row.original as ProductsWithCategory;
@@ -70,13 +61,8 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "quantity",
-    header: ({}) => {
-      return (
-        <Button variant="ghost">
-          Quantity
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Quantity" />;
     },
   },
   {
@@ -126,6 +112,8 @@ export const columns: ColumnDef<Payment>[] = [
 type CellActionsProps = {
   rowData: Tables<"product">;
 };
+
+const NameHeaderAction = () => {};
 
 const CellActions = ({ rowData }: CellActionsProps) => {
   const { data, setOpen, setClose, isOpen } = useModal();
