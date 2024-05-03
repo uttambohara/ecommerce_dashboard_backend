@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -36,22 +37,19 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import supabaseBrowserClient from "@/lib/supabase/supabase-client";
-import { cn, extractNumber } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { ProductsWithCategoryWithColorsWithSizes } from "@/types";
 import { Tables } from "@/types/supabase";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { CalendarIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { toast } from "sonner";
 import FileUpload from "../global/file-upload";
 import { Checkbox } from "../ui/checkbox";
 import { Textarea } from "../ui/textarea";
-import {
-  ProductsWithCategory,
-  ProductsWithCategoryWithColorsWithSizes,
-} from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -85,10 +83,9 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-// Supabase Types needed
 type Size = Tables<"sizes">;
 type Color = Tables<"color">;
-type SubCategory = Tables<"sub-category">;
+type SubCategory = Tables<"sub_category">;
 type Category = Tables<"category">;
 type CategoryWithSubCategory = (Tables<"category"> & {
   "sub-category": SubCategory[];
@@ -127,7 +124,7 @@ const reducer = (
       } else {
         return {
           ...state,
-          sizes: sizes.filter((color, index) => index !== sizeIndex),
+          sizes: sizes.filter((_, index) => index !== sizeIndex),
         };
       }
     case "SET_COLOR":
@@ -140,7 +137,7 @@ const reducer = (
       } else {
         return {
           ...state,
-          colors: colors.filter((color, index) => index !== colorIndex),
+          colors: colors.filter((_, index) => index !== colorIndex),
         };
       }
     case "SET_IMAGES":
@@ -177,7 +174,7 @@ interface CreateProductDetailsProps {
 }
 
 export default function CreateProductDetails({
-  data,
+  data: existingData,
   colors,
   sizes,
   posts,
@@ -185,37 +182,65 @@ export default function CreateProductDetails({
 }: CreateProductDetailsProps) {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Default image load
+  console.log({ existingData });
+  console.log(state);
+
   useEffect(() => {
-    dispatch({ type: "INIT", payload: data });
+    //  INIT
+    if (existingData?.id) {
+      form.reset({
+        name: existingData?.name || "",
+        quantity: existingData?.quantity || 0,
+        description: existingData?.description || "",
+        salesPrice: existingData?.salesPrice || 0,
+        discount: existingData?.discount || 0,
+        sku: existingData?.sku || "",
+        publishDate:
+          (existingData?.publishDate && new Date(existingData?.publishDate)) ||
+          new Date(),
+      });
+      dispatch({
+        type: "INIT",
+        payload: {
+          categories: existingData?.category,
+          sub_categories: existingData && existingData["sub-category"],
+          colors: existingData?.color,
+          sizes: existingData?.sizes,
+        },
+      });
+    }
     dispatch({ type: "SET_IMAGES", payload: posts });
   }, []);
-
   //...
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: data?.name || "",
-      quantity: data?.quantity || 0,
-      description: data?.description || "",
-      salesPrice: data?.salesPrice || 0,
-      discount: data?.discount || 0,
-      sku: data?.sku || "",
+      name: existingData?.name || "",
+      quantity: existingData?.quantity || 0,
+      description: existingData?.description || "",
+      salesPrice: existingData?.salesPrice || 0,
+      discount: existingData?.discount || 0,
+      sku: existingData?.sku || "",
       publishDate:
-        (data?.publishDate && new Date(data?.publishDate)) || new Date(),
+        (existingData?.publishDate && new Date(existingData?.publishDate)) ||
+        new Date(),
     },
   });
 
   async function onSubmit(values: FormSchema) {
+    setIsUpdating(true);
     const { categories, sub_categories, productImgs, ...other } = state;
     const finalData = {
+      id: existingData?.id || uuidv4(),
       ...values,
       category_id: categories?.id,
       productImgs,
       sub_category_id: sub_categories?.id,
     };
 
+    //...
     const arrWithEmptyField = Object.entries(state).reduce(
       (emptyValues, [key, value]: [string, any]) => {
         if (!Boolean(value) || value.length === 0) {
@@ -233,7 +258,6 @@ export default function CreateProductDetails({
       return;
     }
 
-    // ... Supabase
     (async () => {
       try {
         const supabase = supabaseBrowserClient();
@@ -245,21 +269,47 @@ export default function CreateProductDetails({
         if (error) return toast.error(JSON.stringify(error));
         const insertedProductId = data && data[0].id;
 
-        // Colors
-        const colorUpsertPromises = other.colors.map((color: Tables<"color">) =>
-          supabase
-            .from("product_color")
-            .insert({ product_id: insertedProductId, color_id: color.id }),
-        );
-        await Promise.all(colorUpsertPromises);
+        if (!existingData) {
+          const colorInsertPromises = other.colors.map(
+            (color: Tables<"color">) =>
+              supabase
+                .from("product_color")
+                .insert({ product_id: insertedProductId, color_id: color.id }),
+          );
+          const sizeInsertPromises = other.sizes.map((size: Tables<"sizes">) =>
+            supabase
+              .from("product_size")
+              .insert({ product_id: insertedProductId, size_id: size.id }),
+          );
 
-        // Sizes
-        const sizeUpsertPromises = other.sizes.map((size: Tables<"sizes">) =>
-          supabase
-            .from("product_size")
-            .insert({ product_id: insertedProductId, size_id: size.id }),
-        );
-        await Promise.all(sizeUpsertPromises);
+          await Promise.all(colorInsertPromises);
+          await Promise.all(sizeInsertPromises);
+        } else {
+          const productDeletes = [
+            supabase
+              .from("product_color")
+              .delete()
+              .match({ product_id: existingData.id }),
+            supabase
+              .from("product_size")
+              .delete()
+              .match({ product_id: existingData.id }),
+          ];
+          await Promise.all(productDeletes);
+          //...
+          const colorInsertPromises = other.colors.map(
+            (color: Tables<"color">) =>
+              supabase
+                .from("product_color")
+                .insert({ product_id: insertedProductId, color_id: color.id }),
+          );
+          const sizeInsertPromises = other.sizes.map((size: Tables<"sizes">) =>
+            supabase
+              .from("product_size")
+              .insert({ product_id: insertedProductId, size_id: size.id }),
+          );
+          await Promise.all(colorInsertPromises.concat(sizeInsertPromises));
+        }
 
         // Form reset
         form.reset({});
@@ -268,10 +318,13 @@ export default function CreateProductDetails({
           payload: undefined,
         });
 
-        toast.success("Product created 🎉");
+        toast.success("Product's detail updated 🎉");
+        setIsUpdating(false);
+        router.refresh();
       } catch (error) {
         toast.error(JSON.stringify(error));
         console.error("Error upserting data:", error);
+        setIsUpdating(false);
       }
     })();
   }
@@ -312,7 +365,6 @@ export default function CreateProductDetails({
                   )}
                 />
               </div>
-
               <FormField
                 control={form.control}
                 name="quantity"
@@ -370,7 +422,7 @@ export default function CreateProductDetails({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-max">
                       <DropdownMenuGroup>
-                        {categories.map((category) => (
+                        {categories?.map((category) => (
                           <DropdownMenuSub key={category.id}>
                             <DropdownMenuSubTrigger>
                               <span>{category.name}</span>
@@ -410,7 +462,13 @@ export default function CreateProductDetails({
                     <FormItem className="w-full">
                       <FormLabel>Price*</FormLabel>
                       <FormControl>
-                        <Input placeholder="$100.00 " {...field} />
+                        <Input
+                          placeholder="$100.00 "
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -423,7 +481,13 @@ export default function CreateProductDetails({
                     <FormItem className="w-full">
                       <FormLabel>Discount*</FormLabel>
                       <FormControl>
-                        <Input placeholder="10%" {...field} />
+                        <Input
+                          placeholder="10%"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -441,7 +505,7 @@ export default function CreateProductDetails({
                           "flex cursor-pointer items-center gap-2 text-sm",
                           {
                             "rounded-full ring ring-orange-600 ring-offset-2":
-                              state.colors.some(
+                              state.colors?.some(
                                 (item: { id: number }) => item.id === color.id,
                               ),
                           },
@@ -470,7 +534,7 @@ export default function CreateProductDetails({
                           `grid h-6 w-6 cursor-pointer place-content-center rounded-full bg-zinc-300`,
                           {
                             "ring ring-orange-600 ring-offset-2":
-                              state.sizes.some(
+                              state.sizes?.some(
                                 (item: { id: number }) => item.id === size.id,
                               ),
                           },
@@ -602,7 +666,6 @@ export default function CreateProductDetails({
                                 await supabase.storage
                                   .from("product_upload")
                                   .remove([post.name]);
-
                                 dispatch({
                                   type: "REMOVE_IMAGE",
                                   payload: post.name,
@@ -623,9 +686,9 @@ export default function CreateProductDetails({
               </div>
             </div>
           </div>
-
-          <Button type="submit" className="mt-8">
-            Create product
+          <Button type="submit" className="mt-8" disabled={isUpdating}>
+            {isUpdating && <Loader className="animate-spin" />}
+            {!existingData ? " Create product" : "Edit product"}
           </Button>
         </form>
       </Form>

@@ -10,4 +10,6 @@ export type ProductsWithCategoryWithColorsWithSizes = Tables<"product"> & {
   sizes: Tables<"sizes">;
 } & {
   color: Tables<"color">;
+} & {
+  "sub-category": Tables<"sub_category">;
 };

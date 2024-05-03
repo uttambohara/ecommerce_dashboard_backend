@@ -54,7 +54,7 @@ export default async function EditProduct({
     });
 
   const parsedResponse4 = JSON.parse(categoriesResponse);
-  if (!parsedResponse4.data) {
+  if (parsedResponse4.data?.length === 0) {
     throw new Error("Failed to fetch categories data");
   }
 
@@ -63,7 +63,7 @@ export default async function EditProduct({
   if (!parsedResponse5.data) {
     throw new Error("Failed to fetch product data");
   }
-  if (!!parsedResponse5.data.length) {
+  if (parsedResponse5.data.length === 0) {
     return (
       <div className="h-100">
         <h2 className="text-3xl italic">No product with {params.id} found</h2>
@@ -74,7 +74,7 @@ export default async function EditProduct({
   const colors: Tables<"color">[] = parsedResponse1.data;
   const sizes: Tables<"sizes">[] = parsedResponse2.data;
   // ...
-  type SubCategory = Tables<"sub-category">[];
+  type SubCategory = Tables<"sub_category">[];
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
   })[] = parsedResponse4.data;
@@ -87,7 +87,7 @@ export default async function EditProduct({
         sizes={sizes}
         posts={posts}
         categories={categories}
-        data={parsedResponse5}
+        data={parsedResponse5.data[0]}
       />
     </div>
   );

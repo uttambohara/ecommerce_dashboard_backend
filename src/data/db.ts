@@ -5,7 +5,10 @@ import { supabaseServerClient } from "../lib/supabase/supabase-server";
 
 export async function getItemFromDb(id: string | number) {
   const supabase = supabaseServerClient();
-  let response = await supabase.from("product").select("*").eq("id", id);
+  let response = await supabase
+    .from("product")
+    .select("*, color(*), sizes(*), category(*), sub-category(*)")
+    .eq("id", id);
   console.log(response);
   return JSON.stringify(response);
 }

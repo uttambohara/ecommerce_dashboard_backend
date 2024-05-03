@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useModal } from "@/providers/modal-provider";
 import CustomModal from "@/components/global/custom-modal";
+import Link from "next/link";
 
 export type Payment = Tables<"product">;
 
@@ -130,7 +131,7 @@ export const columns: ColumnDef<Payment>[] = [
 ];
 
 type CellActionsProps = {
-  rowData: ProductsWithCategory;
+  rowData: Tables<"product">;
 };
 
 const CellActions = ({ rowData }: CellActionsProps) => {
@@ -147,7 +148,6 @@ const CellActions = ({ rowData }: CellActionsProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
         <DropdownMenuItem
           onClick={() =>
             setOpen(
@@ -185,7 +185,9 @@ const CellActions = ({ rowData }: CellActionsProps) => {
         >
           Delete product
         </DropdownMenuItem>
-        <DropdownMenuItem>Update product</DropdownMenuItem>
+        <Link href={`/admin/product/edit/${rowData.id}`}>
+          <DropdownMenuItem>Update product</DropdownMenuItem>
+        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );

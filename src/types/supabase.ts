@@ -103,7 +103,7 @@ export type Database = {
             foreignKeyName: "products_sub_category_id_fkey"
             columns: ["sub_category_id"]
             isOneToOne: false
-            referencedRelation: "sub-category"
+            referencedRelation: "sub_category"
             referencedColumns: ["id"]
           },
         ]
@@ -195,7 +195,7 @@ export type Database = {
         }
         Relationships: []
       }
-      "sub-category": {
+      sub_category: {
         Row: {
           category_id: number | null
           created_at: string
@@ -216,7 +216,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sub-category_category_id_fkey"
+            foreignKeyName: "sub_category_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "category"

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { M_PLUS_1p } from "next/font/google";
+import { Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import ModalProvider from "@/providers/modal-provider";
 
-const inter = M_PLUS_1p({
+const inter = Bodoni_Moda({
   subsets: ["latin"],
   weight: "400",
 });

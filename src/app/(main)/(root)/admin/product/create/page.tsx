@@ -43,14 +43,16 @@ export default async function CreateProduct() {
     });
 
   const parsedResponse4 = JSON.parse(categoriesResponse);
+  console.log(parsedResponse4);
   if (!parsedResponse4.data) {
     throw new Error("Failed to fetch categories data");
   }
 
   const colors: Tables<"color">[] = parsedResponse1.data;
+  ``;
   const sizes: Tables<"sizes">[] = parsedResponse2.data;
   // ...
-  type SubCategory = Tables<"sub-category">[];
+  type SubCategory = Tables<"sub_category">[];
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
   })[] = parsedResponse4.data;
