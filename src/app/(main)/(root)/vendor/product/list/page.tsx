@@ -8,12 +8,16 @@ import Link from "next/link";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Button } from "@/components/ui/button";
+import { getUser } from "@/actions/user";
 
 export default async function ProductList({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const user = await getUser();
+  const userId = user?.data?.id;
+
   const search = searchParams["search"];
   // Pagination logic
   const page = searchParams["page"] ?? 1;
@@ -26,6 +30,7 @@ export default async function ProductList({
   let query = supabase
     .from("product")
     .select("*, category(*)")
+    .eq("user_id", userId as string)
     .order("created_at", { ascending: false });
 
   // Calculation of total Products
@@ -45,10 +50,10 @@ export default async function ProductList({
       <div className="flex flex-wrap justify-between gap-2">
         <PaginationInput
           filterBy={"Entry"}
-          route={"/admin/product/list"}
+          route={"/vendor/product/list"}
           className="w-[16rem] pl-8"
         />
-        <Link href="/admin/product/create">
+        <Link href="/vendor/product/create">
           <Button>
             <Plus size={18} />
             Create product
@@ -58,7 +63,7 @@ export default async function ProductList({
 
       <DataTable columns={columns} data={products} />
       <PaginationControl
-        route={"/admin/product/list"}
+        route={"/vendor/product/list"}
         totalPagesLoaded={products?.length}
         totalProductLength={totalProducts as number}
         hasNextPage={end < products?.length}

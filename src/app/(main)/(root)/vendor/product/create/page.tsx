@@ -1,3 +1,4 @@
+import { getUser } from "@/actions/user";
 import CreateProductDetails from "@/components/form/create-product-details";
 import MainHeader from "@/components/layouts/section-header";
 import {
@@ -9,6 +10,7 @@ import {
 import { Tables } from "@/types/supabase";
 
 export default async function CreateProduct() {
+  const user = await getUser();
   const [colorsResponse, sizesResponse, imagesResponse, categoriesResponse] =
     await Promise.all([
       getAllItemsFromDb("color"),
@@ -51,7 +53,7 @@ export default async function CreateProduct() {
   ``;
   const sizes: Tables<"sizes">[] = parsedResponse2.data;
   // ...
-  type SubCategory = Tables<"sub_category">[];
+  type SubCategory = Tables<"sub-category">[];
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
   })[] = parsedResponse4.data;
@@ -64,6 +66,7 @@ export default async function CreateProduct() {
         sizes={sizes}
         posts={posts}
         categories={categories}
+        user_id={user?.data?.id}
       />
     </div>
   );

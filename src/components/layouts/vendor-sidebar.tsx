@@ -4,17 +4,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { navItemsAdmin } from "@/data/constant";
+import { navItemsVendor } from "@/data/constant";
 import Link from "next/link";
 import Logo from "../logo";
 
-export default function AdminSidebar() {
+export default function VendorSidebar() {
   return (
     <nav className="hidden h-screen space-y-6 border-r  px-2 py-4 xl:flex xl:flex-col">
       <Logo />
 
       <div className="flex flex-col gap-1">
-        {navItemsAdmin.map(({ title, list }) => (
+        {navItemsVendor.map(({ title, list }) => (
           <div key={title} className="space-y-3">
             <div className="font-bold">{title}</div>
 

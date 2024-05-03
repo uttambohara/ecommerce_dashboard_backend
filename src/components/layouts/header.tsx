@@ -12,7 +12,7 @@ export default function Header() {
 
   return (
     <header className="flex h-[4rem] items-center justify-between bg-zinc-100 px-8 shadow-sm">
-      <div>Header</div>
+      <div></div>
       <Button
         className="flex gap-2"
         onClick={() => {

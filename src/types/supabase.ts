@@ -62,6 +62,7 @@ export type Database = {
           salesPrice: number | null
           sku: string | null
           sub_category_id: number | null
+          user_id: string | null
         }
         Insert: {
           category_id?: number | null
@@ -76,6 +77,7 @@ export type Database = {
           salesPrice?: number | null
           sku?: string | null
           sub_category_id?: number | null
+          user_id?: string | null
         }
         Update: {
           category_id?: number | null
@@ -90,20 +92,28 @@ export type Database = {
           salesPrice?: number | null
           sku?: string | null
           sub_category_id?: number | null
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "product_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: false
+            referencedRelation: "sub-category"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_sub_category_id_fkey"
-            columns: ["sub_category_id"]
-            isOneToOne: false
-            referencedRelation: "sub_category"
             referencedColumns: ["id"]
           },
         ]
@@ -195,7 +205,7 @@ export type Database = {
         }
         Relationships: []
       }
-      sub_category: {
+      "sub-category": {
         Row: {
           category_id: number | null
           created_at: string
@@ -216,10 +226,42 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "sub_category_category_id_fkey"
+            foreignKeyName: "sub-category_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "category"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          email: string
+          full_name: string | null
+          id: string
+          role: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          role?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

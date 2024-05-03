@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply overflow-y-hidden;
+  @apply overflow-y-hidden text-slate-700;
 }
 
 h1 {

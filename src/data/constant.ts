@@ -1,45 +1,45 @@
 import { BoxIcon, ListFilter, ReceiptText, WalletMinimal } from "lucide-react";
 export const DEBOUNCE_DELAY = 1000;
-export const navItemsAdmin = [
+export const navItemsVendor = [
   {
     title: "Management",
     list: [
       {
         id: 1,
         name: "Product",
-        link: "/admin/product",
+        link: "/vendor/product",
         icon: BoxIcon,
         sub: [
           {
             id: 1,
             name: "Create",
-            link: "/admin/product/create",
+            link: "/vendor/product/create",
           },
           {
             id: 2,
             name: "List",
-            link: "/admin/product/list",
+            link: "/vendor/product/list",
           },
         ],
       },
       {
         id: 2,
         name: "Category",
-        link: "/admin/category",
+        link: "/vendor/category",
         icon: ListFilter,
         sub: [],
       },
       {
         id: 3,
         name: "Order",
-        link: "/admin/order",
+        link: "/vendor/order",
         icon: WalletMinimal,
         sub: [],
       },
       {
         id: 4,
         name: "Invoice",
-        link: "/admin/invoice",
+        link: "/vendor/invoice",
         icon: ReceiptText,
         sub: [],
       },

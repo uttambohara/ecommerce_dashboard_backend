@@ -177,7 +177,7 @@ const CellActions = ({ rowData }: CellActionsProps) => {
         >
           <div className="flex items-center gap-1 text-red-600">Delete</div>
         </DropdownMenuItem>
-        <Link href={`/admin/product/edit/${rowData.id}`}>
+        <Link href={`/vendor/product/edit/${rowData.id}`}>
           <DropdownMenuItem>Update</DropdownMenuItem>
         </Link>
       </DropdownMenuContent>

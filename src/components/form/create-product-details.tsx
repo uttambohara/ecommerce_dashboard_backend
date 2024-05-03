@@ -84,7 +84,7 @@ type FormSchema = z.infer<typeof formSchema>;
 
 type Size = Tables<"sizes">;
 type Color = Tables<"color">;
-type SubCategory = Tables<"sub_category">;
+type SubCategory = Tables<"sub-category">;
 type Category = Tables<"category">;
 type CategoryWithSubCategory = (Tables<"category"> & {
   "sub-category": SubCategory[];
@@ -170,10 +170,12 @@ interface CreateProductDetailsProps {
   posts: { name: string; image: string }[];
   categories: CategoryWithSubCategory;
   data?: ProductsWithCategoryWithColorsWithSizes;
+  user_id: string | undefined;
 }
 
 type ProductDataType = {
   id?: string | number;
+  user_id: string | undefined;
   category_id: any;
   productImgs: any;
   sub_category_id: any;
@@ -192,6 +194,7 @@ export default function CreateProductDetails({
   sizes,
   posts,
   categories,
+  user_id,
 }: CreateProductDetailsProps) {
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -243,6 +246,7 @@ export default function CreateProductDetails({
     setIsUpdating(true);
     const { categories, sub_categories, productImgs, ...other } = state;
     let finalData: ProductDataType = {
+      user_id,
       ...values,
       category_id: categories?.id,
       productImgs,
@@ -334,6 +338,7 @@ export default function CreateProductDetails({
         });
         setIsUpdating(false);
         toast.success("Product's detail updated 🎉");
+        // TODO: Router refresh not working (needs further lookup)
         window.location.reload();
       } catch (error) {
         setIsUpdating(false);
@@ -348,9 +353,9 @@ export default function CreateProductDetails({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {/* Layout 1*/}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-12">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[55%_45%] lg:gap-12">
             <div className="space-y-4">
-              <h2 className="font-bold">General Information</h2>
+              <h2 className="text-xl font-bold">General Information</h2>
               <div className="flex flex-col items-center gap-4 md:flex-row">
                 <FormField
                   control={form.control}
@@ -390,14 +395,7 @@ export default function CreateProductDetails({
                         {...field}
                         type="number"
                         onChange={(e) => {
-                          let value = e.target.value;
-                          let finalValue;
-                          // Check if the value is "0" and clear it if so
-                          if (value === "0") finalValue = "";
-                          // Parse the value to a number if it's not an empty string
-                          if (value !== "") finalValue = parseInt(value);
-                          // Pass the converted value to field.onChange instead of the entire event object
-                          field.onChange(finalValue);
+                          field.onChange(e.target.value);
                         }}
                       />
                     </FormControl>
@@ -453,22 +451,24 @@ export default function CreateProductDetails({
                             </DropdownMenuSubTrigger>
                             <DropdownMenuPortal>
                               <DropdownMenuSubContent>
-                                {category["sub-category"].map((sub) => (
-                                  <DropdownMenuItem
-                                    key={sub.id}
-                                    onClick={() =>
-                                      dispatch({
-                                        type: "SET_CATEGORY_SUBCATEGORY_IDS",
-                                        payload: {
-                                          categories: category,
-                                          sub_categories: sub,
-                                        },
-                                      })
-                                    }
-                                  >
-                                    <span>{sub.name}</span>
-                                  </DropdownMenuItem>
-                                ))}
+                                {category["sub-category"].map(
+                                  (sub: Tables<"sub-category">) => (
+                                    <DropdownMenuItem
+                                      key={sub.id}
+                                      onClick={() =>
+                                        dispatch({
+                                          type: "SET_CATEGORY_SUBCATEGORY_IDS",
+                                          payload: {
+                                            categories: category,
+                                            sub_categories: sub,
+                                          },
+                                        })
+                                      }
+                                    >
+                                      <span>{sub.name}</span>
+                                    </DropdownMenuItem>
+                                  ),
+                                )}
                               </DropdownMenuSubContent>
                             </DropdownMenuPortal>
                           </DropdownMenuSub>
@@ -491,14 +491,7 @@ export default function CreateProductDetails({
                           placeholder="0"
                           {...field}
                           onChange={(e) => {
-                            let value = e.target.value;
-                            let finalValue;
-                            // Check if the value is "0" and clear it if so
-                            if (value === "0") finalValue = "";
-                            // Parse the value to a number if it's not an empty string
-                            if (value !== "") finalValue = parseInt(value);
-                            // Pass the converted value to field.onChange instead of the entire event object
-                            field.onChange(finalValue);
+                            field.onChange(e.target.value);
                           }}
                         />
                       </FormControl>
@@ -518,14 +511,7 @@ export default function CreateProductDetails({
                           type="number"
                           {...field}
                           onChange={(e) => {
-                            let value = e.target.value;
-                            let finalValue;
-                            // Check if the value is "0" and clear it if so
-                            if (value === "0") finalValue = "";
-                            // Parse the value to a number if it's not an empty string
-                            if (value !== "") finalValue = parseInt(value);
-                            // Pass the converted value to field.onChange instead of the entire event object
-                            field.onChange(finalValue);
+                            field.onChange(e.target.value);
                           }}
                         />
                       </FormControl>
