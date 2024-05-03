@@ -43,7 +43,6 @@ export default async function CreateProduct() {
     });
 
   const parsedResponse4 = JSON.parse(categoriesResponse);
-  console.log(parsedResponse4);
   if (!parsedResponse4.data) {
     throw new Error("Failed to fetch categories data");
   }

@@ -38,8 +38,6 @@ export default async function ProductList({
 
   const { data: products, error } = await query.range(start, end);
   if (!products) throw new Error(error?.message);
-  console.log(products);
-  console.log(end, products?.length);
 
   return (
     <div className="space-y-6">

@@ -1,39 +1,32 @@
 "use client";
 
+import CustomModal from "@/components/global/custom-modal";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrencyToNPR } from "@/lib/currency-formatter";
-import { ProductsWithCategory } from "@/types";
-import { Tables } from "@/types/supabase";
-import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Check, Clock } from "lucide-react";
-import Image from "next/image";
-import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
+import { formatCurrencyToNPR } from "@/lib/currency-formatter";
 import supabaseBrowserClient from "@/lib/supabase/supabase-client";
-import { revalidatePath } from "next/cache";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useModal } from "@/providers/modal-provider";
-import CustomModal from "@/components/global/custom-modal";
+import { ProductsWithCategory } from "@/types";
+import { Tables } from "@/types/supabase";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  ArrowUpDown,
+  Check,
+  Clock,
+  MoreHorizontal,
+  Trash2,
+} from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export type Payment = Tables<"product">;
 
@@ -77,7 +70,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "quantity",
-    header: ({ column }) => {
+    header: ({}) => {
       return (
         <Button variant="ghost">
           Quantity
@@ -136,7 +129,6 @@ type CellActionsProps = {
 
 const CellActions = ({ rowData }: CellActionsProps) => {
   const { data, setOpen, setClose, isOpen } = useModal();
-
   const router = useRouter();
   return (
     <DropdownMenu>
@@ -164,14 +156,14 @@ const CellActions = ({ rowData }: CellActionsProps) => {
                     <Button
                       className="bg-red-700"
                       onClick={async () => {
-                        console.log(rowData.id);
                         const supabase = supabaseBrowserClient();
                         const { error } = await supabase
                           .from("product")
                           .delete()
                           .eq("id", rowData.id);
-                        console.log(error);
+                        if (error) toast.error(error.message);
                         setClose();
+                        toast.success("Product deleted");
                         router.refresh();
                       }}
                     >
@@ -183,10 +175,10 @@ const CellActions = ({ rowData }: CellActionsProps) => {
             )
           }
         >
-          Delete product
+          <div className="flex items-center gap-1 text-red-600">Delete</div>
         </DropdownMenuItem>
         <Link href={`/admin/product/edit/${rowData.id}`}>
-          <DropdownMenuItem>Update product</DropdownMenuItem>
+          <DropdownMenuItem>Update</DropdownMenuItem>
         </Link>
       </DropdownMenuContent>
     </DropdownMenu>

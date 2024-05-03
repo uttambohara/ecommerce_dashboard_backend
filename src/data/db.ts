@@ -9,7 +9,6 @@ export async function getItemFromDb(id: string | number) {
     .from("product")
     .select("*, color(*), sizes(*), category(*), sub-category(*)")
     .eq("id", id);
-  console.log(response);
   return JSON.stringify(response);
 }
 

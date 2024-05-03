@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { Bodoni_Moda } from "next/font/google";
+import { Andika } from "next/font/google";
 import "./globals.css";
 import ModalProvider from "@/providers/modal-provider";
 
-const inter = Bodoni_Moda({
+const inter = Andika({
   subsets: ["latin"],
   weight: "400",
 });

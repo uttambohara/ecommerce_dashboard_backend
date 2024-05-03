@@ -3,8 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDown, Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
+import { coerce, z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -58,16 +57,16 @@ const formSchema = z.object({
   description: z.string().min(2, {
     message: "Description must be at least 2 characters.",
   }),
-  salesPrice: z.number().positive({
+  salesPrice: coerce.number().positive({
     message: "Price must be greater than 0",
   }),
-  discount: z.number().nonnegative({
+  discount: coerce.number().nonnegative({
     message: "Discount cannot be negative",
   }),
   sku: z.string().min(2, {
     message: "SKU must be at least 2 characters.",
   }),
-  quantity: z
+  quantity: coerce
     .number()
     .positive({
       message: "Value must be greater than 0",
@@ -173,6 +172,20 @@ interface CreateProductDetailsProps {
   data?: ProductsWithCategoryWithColorsWithSizes;
 }
 
+type ProductDataType = {
+  id?: string | number;
+  category_id: any;
+  productImgs: any;
+  sub_category_id: any;
+  name: string;
+  description: string;
+  salesPrice: number;
+  discount: number;
+  sku: string;
+  quantity: number;
+  publishDate: Date;
+};
+
 export default function CreateProductDetails({
   data: existingData,
   colors,
@@ -183,9 +196,6 @@ export default function CreateProductDetails({
   const router = useRouter();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isUpdating, setIsUpdating] = useState(false);
-
-  console.log({ existingData });
-  console.log(state);
 
   useEffect(() => {
     //  INIT
@@ -232,13 +242,15 @@ export default function CreateProductDetails({
   async function onSubmit(values: FormSchema) {
     setIsUpdating(true);
     const { categories, sub_categories, productImgs, ...other } = state;
-    const finalData = {
-      id: existingData?.id || uuidv4(),
+    let finalData: ProductDataType = {
       ...values,
       category_id: categories?.id,
       productImgs,
       sub_category_id: sub_categories?.id,
     };
+    if (existingData && existingData.id) {
+      finalData.id = existingData.id;
+    }
 
     //...
     const arrWithEmptyField = Object.entries(state).reduce(
@@ -252,6 +264,7 @@ export default function CreateProductDetails({
     );
 
     if (arrWithEmptyField.length > 0) {
+      setIsUpdating(false);
       toast.error(
         `These fields are empty: ${arrWithEmptyField.join(", ").toUpperCase()}`,
       );
@@ -266,10 +279,15 @@ export default function CreateProductDetails({
           .from("product")
           .upsert(finalData)
           .select();
-        if (error) return toast.error(JSON.stringify(error));
+
+        if (error) {
+          toast.error(JSON.stringify(error));
+          return setIsUpdating(false);
+        }
         const insertedProductId = data && data[0].id;
 
         if (!existingData) {
+          // UPDATE
           const colorInsertPromises = other.colors.map(
             (color: Tables<"color">) =>
               supabase
@@ -281,7 +299,6 @@ export default function CreateProductDetails({
               .from("product_size")
               .insert({ product_id: insertedProductId, size_id: size.id }),
           );
-
           await Promise.all(colorInsertPromises);
           await Promise.all(sizeInsertPromises);
         } else {
@@ -311,20 +328,17 @@ export default function CreateProductDetails({
           await Promise.all(colorInsertPromises.concat(sizeInsertPromises));
         }
 
-        // Form reset
-        form.reset({});
         dispatch({
           type: "RESET",
           payload: undefined,
         });
-
-        toast.success("Product's detail updated 🎉");
         setIsUpdating(false);
-        router.refresh();
+        toast.success("Product's detail updated 🎉");
+        window.location.reload();
       } catch (error) {
+        setIsUpdating(false);
         toast.error(JSON.stringify(error));
         console.error("Error upserting data:", error);
-        setIsUpdating(false);
       }
     })();
   }
@@ -374,7 +388,17 @@ export default function CreateProductDetails({
                     <FormControl>
                       <Input
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        type="number"
+                        onChange={(e) => {
+                          let value = e.target.value;
+                          let finalValue;
+                          // Check if the value is "0" and clear it if so
+                          if (value === "0") finalValue = "";
+                          // Parse the value to a number if it's not an empty string
+                          if (value !== "") finalValue = parseInt(value);
+                          // Pass the converted value to field.onChange instead of the entire event object
+                          field.onChange(finalValue);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -411,7 +435,7 @@ export default function CreateProductDetails({
                           {Boolean(state.categories?.id) ||
                           Boolean(state.sub_categories?.id) ? (
                             <span>
-                              {`${state.categories.name} ↪ ${state.sub_categories.name}`}
+                              {`${state.categories.name} / ${state.sub_categories.name}`}
                             </span>
                           ) : (
                             <span>Select a category</span>
@@ -463,11 +487,19 @@ export default function CreateProductDetails({
                       <FormLabel>Price*</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="$100.00 "
+                          type="number"
+                          placeholder="0"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            let finalValue;
+                            // Check if the value is "0" and clear it if so
+                            if (value === "0") finalValue = "";
+                            // Parse the value to a number if it's not an empty string
+                            if (value !== "") finalValue = parseInt(value);
+                            // Pass the converted value to field.onChange instead of the entire event object
+                            field.onChange(finalValue);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -483,10 +515,18 @@ export default function CreateProductDetails({
                       <FormControl>
                         <Input
                           placeholder="10%"
+                          type="number"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            let finalValue;
+                            // Check if the value is "0" and clear it if so
+                            if (value === "0") finalValue = "";
+                            // Parse the value to a number if it's not an empty string
+                            if (value !== "") finalValue = parseInt(value);
+                            // Pass the converted value to field.onChange instead of the entire event object
+                            field.onChange(finalValue);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -686,8 +726,12 @@ export default function CreateProductDetails({
               </div>
             </div>
           </div>
-          <Button type="submit" className="mt-8" disabled={isUpdating}>
-            {isUpdating && <Loader className="animate-spin" />}
+          <Button
+            type="submit"
+            className="mt-8 flex items-center gap-1"
+            disabled={isUpdating}
+          >
+            {isUpdating && <Loader className="animate-spin" size={16} />}
             {!existingData ? " Create product" : "Edit product"}
           </Button>
         </form>

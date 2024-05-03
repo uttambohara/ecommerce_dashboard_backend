@@ -22,8 +22,6 @@ export default function PaginationControl({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  console.log(totalProductLength, totalPagesLoaded);
-
   const page = searchParams.get("page") ?? 1;
   const limit = searchParams.get("limit") ?? PER_PAGE;
 

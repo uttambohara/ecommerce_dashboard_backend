@@ -10,7 +10,7 @@ import Logo from "../logo";
 
 export default function AdminSidebar() {
   return (
-    <nav className="hidden h-screen space-y-6 border-r bg-[#121621] px-2 py-4 text-white/90 xl:flex xl:flex-col">
+    <nav className="hidden h-screen space-y-6 border-r  px-2 py-4 xl:flex xl:flex-col">
       <Logo />
 
       <div className="flex flex-col gap-1">

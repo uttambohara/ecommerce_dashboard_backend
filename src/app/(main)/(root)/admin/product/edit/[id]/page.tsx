@@ -28,16 +28,15 @@ export default async function EditProduct({
     getAllCategoriesWithSubCategories(),
   ]);
 
-  const parsedResponse1 = JSON.parse(colorsResponse);
-  if (!parsedResponse1.data) {
+  const colorParsed = JSON.parse(colorsResponse);
+  if (!colorParsed.data) {
     throw new Error("Failed to fetch colors data");
   }
 
-  const parsedResponse2 = JSON.parse(sizesResponse);
-  if (!parsedResponse2.data) {
+  const sizesParsed = JSON.parse(sizesResponse);
+  if (!sizesParsed.data) {
     throw new Error("Failed to fetch sizes data");
   }
-
   const { data } = JSON.parse(imagesResponse);
   if (!data) {
     throw new Error("Failed to fetch images");
@@ -53,17 +52,16 @@ export default async function EditProduct({
       };
     });
 
-  const parsedResponse4 = JSON.parse(categoriesResponse);
-  if (parsedResponse4.data?.length === 0) {
+  const categoriesParsed = JSON.parse(categoriesResponse);
+  if (categoriesParsed.data?.length === 0) {
     throw new Error("Failed to fetch categories data");
   }
 
-  const parsedResponse5 = JSON.parse(indvProductResponse);
-  console.log(parsedResponse5);
-  if (!parsedResponse5.data) {
+  const individualProductParsed = JSON.parse(indvProductResponse);
+  if (!individualProductParsed.data) {
     throw new Error("Failed to fetch product data");
   }
-  if (parsedResponse5.data.length === 0) {
+  if (individualProductParsed.data.length === 0) {
     return (
       <div className="h-100">
         <h2 className="text-3xl italic">No product with {params.id} found</h2>
@@ -71,13 +69,14 @@ export default async function EditProduct({
     );
   }
 
-  const colors: Tables<"color">[] = parsedResponse1.data;
-  const sizes: Tables<"sizes">[] = parsedResponse2.data;
-  // ...
+  const colors: Tables<"color">[] = colorParsed.data;
+  const sizes: Tables<"sizes">[] = sizesParsed.data;
   type SubCategory = Tables<"sub_category">[];
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
-  })[] = parsedResponse4.data;
+  })[] = categoriesParsed.data;
+
+  console.log(individualProductParsed.data[0]);
 
   return (
     <div className="space-y-6">
@@ -87,7 +86,7 @@ export default async function EditProduct({
         sizes={sizes}
         posts={posts}
         categories={categories}
-        data={parsedResponse5.data[0]}
+        data={individualProductParsed.data[0]}
       />
     </div>
   );
