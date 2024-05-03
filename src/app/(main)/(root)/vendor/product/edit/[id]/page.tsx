@@ -1,3 +1,4 @@
+import { getUser } from "@/actions/user";
 import CreateProductDetails from "@/components/form/create-product-details";
 import MainHeader from "@/components/layouts/section-header";
 import {
@@ -14,6 +15,7 @@ export default async function EditProduct({
 }: {
   params: { id: number | string };
 }) {
+  const user = await getUser();
   const [
     indvProductResponse,
     colorsResponse,
@@ -64,14 +66,16 @@ export default async function EditProduct({
   if (individualProductParsed.data.length === 0) {
     return (
       <div className="h-100">
-        <h2 className="text-3xl italic">No product with {params.id} found</h2>
+        <h2 className="text-3xl italic">
+          No product with (id: {params.id}) found
+        </h2>
       </div>
     );
   }
 
   const colors: Tables<"color">[] = colorParsed.data;
   const sizes: Tables<"sizes">[] = sizesParsed.data;
-  type SubCategory = Tables<"sub_category">[];
+  type SubCategory = Tables<"sub-category">[];
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
   })[] = categoriesParsed.data;
@@ -87,6 +91,7 @@ export default async function EditProduct({
         posts={posts}
         categories={categories}
         data={individualProductParsed.data[0]}
+        user_id={user?.data?.id}
       />
     </div>
   );

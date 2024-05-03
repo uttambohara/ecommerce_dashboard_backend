@@ -44,7 +44,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       const rowData = row.original as ProductsWithCategory;
       const img = rowData.productImgs as Record<string, string>[];
-      const firstImg = img[1];
+      const firstImg = img[0];
       return (
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative h-12 w-12">

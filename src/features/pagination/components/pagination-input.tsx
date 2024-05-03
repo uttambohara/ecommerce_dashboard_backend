@@ -31,7 +31,7 @@ export default function PaginationInput({
       { skipNull: true, skipEmptyString: true },
     );
     return qs;
-  }, [searchResult]);
+  }, [searchResult, route]);
 
   useEffect(() => {
     router.push(updateRoute);

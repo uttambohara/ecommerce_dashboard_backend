@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { Redressed } from "next/font/google";
+import { Andika } from "next/font/google";
 import "./globals.css";
 import ModalProvider from "@/providers/modal-provider";
 
-const inter = Redressed({
+const inter = Andika({
   subsets: ["latin"],
   weight: "400",
 });

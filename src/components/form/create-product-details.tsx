@@ -44,7 +44,7 @@ import { format } from "date-fns";
 import { CalendarIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useState } from "react";
+import { Key, useEffect, useReducer, useState } from "react";
 import { toast } from "sonner";
 import FileUpload from "../global/file-upload";
 import { Checkbox } from "../ui/checkbox";
@@ -93,7 +93,7 @@ type CategoryWithSubCategory = (Tables<"category"> & {
 interface ProductState {
   sizes: Size[];
   colors: Color[];
-  productImgs: { name: string; image: string }[];
+  productImgs: { name: string; image: string }[] | [];
   categories: Category | null;
   sub_categories: SubCategory | null;
 }
@@ -156,9 +156,9 @@ const reducer = (
       };
     case "SET_PUBLISHED_DATE":
       return { ...state, publishedDate: action.payload };
-
     case "RESET":
-      return { ...state, initialState };
+      console.log("RESETTING");
+      return { ...state, ...initialState };
     default:
       return state;
   }
@@ -217,6 +217,7 @@ export default function CreateProductDetails({
       dispatch({
         type: "INIT",
         payload: {
+          productImgs: existingData.productImgs,
           categories: existingData?.category,
           sub_categories: existingData && existingData["sub-category"],
           colors: existingData?.color,
@@ -224,8 +225,9 @@ export default function CreateProductDetails({
         },
       });
     }
-    dispatch({ type: "SET_IMAGES", payload: posts });
   }, []);
+
+  console.log(state);
   //...
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -332,14 +334,15 @@ export default function CreateProductDetails({
           await Promise.all(colorInsertPromises.concat(sizeInsertPromises));
         }
 
+        if (!existingData?.id) form.reset();
+
         dispatch({
           type: "RESET",
-          payload: undefined,
+          payload: initialState,
         });
         setIsUpdating(false);
         toast.success("Product's detail updated 🎉");
-        // TODO: Router refresh not working (needs further lookup)
-        window.location.reload();
+        router.refresh();
       } catch (error) {
         setIsUpdating(false);
         toast.error(JSON.stringify(error));
@@ -353,7 +356,7 @@ export default function CreateProductDetails({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {/* Layout 1*/}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[55%_45%] lg:gap-12">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-12">
             <div className="space-y-4">
               <h2 className="text-xl font-bold">General Information</h2>
               <div className="flex flex-col items-center gap-4 md:flex-row">
@@ -663,48 +666,51 @@ export default function CreateProductDetails({
                 <div className="space-y-2">
                   <FileUpload dispatch={dispatch} />
                   <div>
-                    {posts.length === 0 && (
+                    {state.productImgs.length === 0 && (
                       <div className="text-center italic">
                         <h3 className="mt-6 text-2xl text-muted-foreground underline decoration-orange-400 underline-offset-8">
-                          No images uploaded!
+                          No images uploaded for display!
                         </h3>
                       </div>
                     )}
-                    {posts.length > 0 && (
+                    {state.productImgs?.length > 0 && (
                       <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
-                        {posts.map((post) => (
-                          <div
-                            key={post.name}
-                            className="relative h-[12rem] w-[100%]"
-                          >
-                            <Image
-                              src={post.image}
-                              alt={post.name}
-                              fill
-                              priority
-                              className="object-cover"
-                            />
+                        {state.productImgs?.map(
+                          (post: { name: string; image: string }) => (
                             <div
-                              className="absolute left-1/2 top-2 flex -translate-x-1/2 cursor-pointer items-center justify-center gap-1 rounded-full bg-red-400/30 p-2 text-xs text-orange-600 shadow-md backdrop-blur-md transition-all hover:bg-red-600/30 hover:text-red-800"
-                              onClick={async () => {
-                                // handle remove image from bucket
-                                const supabase = supabaseBrowserClient();
-                                await supabase.storage
-                                  .from("product_upload")
-                                  .remove([post.name]);
-                                dispatch({
-                                  type: "REMOVE_IMAGE",
-                                  payload: post.name,
-                                });
-                                router.refresh();
-                                // Update state
-                              }}
+                              key={post.name}
+                              className="relative h-[12rem] w-[100%]"
                             >
-                              <X size={18} />
-                              <span>Remove</span>
+                              <Image
+                                src={post.image}
+                                alt={post.name}
+                                fill
+                                priority
+                                className="object-cover"
+                              />
+                              <div
+                                className="absolute left-1/2 top-2 flex -translate-x-1/2 cursor-pointer items-center justify-center gap-1 rounded-full bg-red-400/30 p-2 text-xs text-orange-600 shadow-md backdrop-blur-md transition-all hover:bg-red-600/30 hover:text-red-800"
+                                onClick={async () => {
+                                  // handle remove image from bucket
+                                  const supabase = supabaseBrowserClient();
+                                  await supabase.storage
+                                    .from("product_upload")
+                                    .remove([post.name]);
+
+                                  dispatch({
+                                    type: "REMOVE_IMAGE",
+                                    payload: post.name,
+                                  });
+                                  router.refresh();
+                                  // Update state
+                                }}
+                              >
+                                <X size={18} />
+                                <span>Remove</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
                     )}
                   </div>

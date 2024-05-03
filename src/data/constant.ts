@@ -1,5 +1,5 @@
 import { BoxIcon, ListFilter, ReceiptText, WalletMinimal } from "lucide-react";
-export const DEBOUNCE_DELAY = 1000;
+export const DEBOUNCE_DELAY = 500;
 export const navItemsVendor = [
   {
     title: "Management",
