@@ -6,15 +6,18 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import { Slash } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 interface MainHeaderProps {
   title: string;
   description?: string;
+  useBreadcrumb: boolean;
 }
 
-export default function SectionHeader({ title }: MainHeaderProps) {
+export default function SectionHeader({
+  title,
+  useBreadcrumb = false,
+}: MainHeaderProps) {
   //...
   const pathSegments = usePathname()
     .split("/")
@@ -29,11 +32,12 @@ export default function SectionHeader({ title }: MainHeaderProps) {
   });
 
   return (
-    <div className="flex items-center justify-between space-y-1 pb-6">
+    <div className="flex items-center justify-between gap-4 space-y-1 py-6">
       <div className="space-y-2">
         <h1>{title}</h1>
       </div>
-      <div>
+
+      {useBreadcrumb && (
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((breadcrumb, index) => (
@@ -44,16 +48,12 @@ export default function SectionHeader({ title }: MainHeaderProps) {
                 <BreadcrumbLink href={breadcrumb.link} className="text-[1rem]">
                   {breadcrumb.name}
                 </BreadcrumbLink>
-                {index < breadcrumbs.length - 1 && (
-                  <div>
-                    <Slash />
-                  </div>
-                )}
+                {index < breadcrumbs.length - 1 && <div>/</div>}
               </BreadcrumbItem>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-      </div>
+      )}
     </div>
   );
 }

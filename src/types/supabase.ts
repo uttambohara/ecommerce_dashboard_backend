@@ -58,6 +58,7 @@ export type Database = {
           name: string | null
           productImgs: Json | null
           publishDate: string | null
+          quantity: number | null
           salesPrice: number | null
           sku: string | null
           sub_category_id: number | null
@@ -71,6 +72,7 @@ export type Database = {
           name?: string | null
           productImgs?: Json | null
           publishDate?: string | null
+          quantity?: number | null
           salesPrice?: number | null
           sku?: string | null
           sub_category_id?: number | null
@@ -84,6 +86,7 @@ export type Database = {
           name?: string | null
           productImgs?: Json | null
           publishDate?: string | null
+          quantity?: number | null
           salesPrice?: number | null
           sku?: string | null
           sub_category_id?: number | null

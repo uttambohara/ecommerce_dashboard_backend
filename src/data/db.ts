@@ -1,7 +1,14 @@
 "use server";
 
 import { Database } from "@/types/supabase";
-import { supabaseServerClient } from "./supabase/supabase-server";
+import { supabaseServerClient } from "../lib/supabase/supabase-server";
+
+export async function getItemFromDb(id: string | number) {
+  const supabase = supabaseServerClient();
+  let response = await supabase.from("product").select("*").eq("id", id);
+  console.log(response);
+  return JSON.stringify(response);
+}
 
 export async function getAllItemsFromDb(
   item: keyof Database["public"]["Tables"],

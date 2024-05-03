@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { Bodoni_Moda } from "next/font/google";
+import { M_PLUS_1p } from "next/font/google";
 import "./globals.css";
+import ModalProvider from "@/providers/modal-provider";
 
-const inter = Bodoni_Moda({
+const inter = M_PLUS_1p({
   subsets: ["latin"],
   weight: "400",
 });
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <ModalProvider>{children}</ModalProvider>
         <Toaster position="top-right" richColors />
       </body>
     </html>

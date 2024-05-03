@@ -1,5 +1,14 @@
+import Pagination from "@/features/pagination";
 import React from "react";
 
-export default function Pagination() {
-  return <div>Pagination</div>;
+export default function PaginationPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  return (
+    <div>
+      <Pagination searchParams={searchParams} />
+    </div>
+  );
 }

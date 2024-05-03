@@ -11,9 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuPortal,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -50,6 +48,10 @@ import { toast } from "sonner";
 import FileUpload from "../global/file-upload";
 import { Checkbox } from "../ui/checkbox";
 import { Textarea } from "../ui/textarea";
+import {
+  ProductsWithCategory,
+  ProductsWithCategoryWithColorsWithSizes,
+} from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -58,15 +60,26 @@ const formSchema = z.object({
   description: z.string().min(2, {
     message: "Description must be at least 2 characters.",
   }),
-  salesPrice: z.string().min(2, {
-    message: "Price must be at least 2 characters.",
+  salesPrice: z.number().positive({
+    message: "Price must be greater than 0",
   }),
-  discount: z.string().min(2, {
-    message: "Discount must be at least 2 characters.",
+  discount: z.number().nonnegative({
+    message: "Discount cannot be negative",
   }),
   sku: z.string().min(2, {
     message: "SKU must be at least 2 characters.",
   }),
+  quantity: z
+    .number()
+    .positive({
+      message: "Value must be greater than 0",
+    })
+    .int({
+      message: "Value must be an integer",
+    })
+    .refine((value) => String(value).length <= 2, {
+      message: "Value must be a 1 or 2 digit number",
+    }),
   publishDate: z.date(),
 });
 
@@ -102,6 +115,8 @@ const reducer = (
   action: { type: string; payload: any },
 ) => {
   switch (action.type) {
+    case "INIT":
+      return { ...state, ...action.payload };
     case "SET_SIZE":
       const { sizes } = state;
       const sizeIndex = sizes.findIndex(
@@ -145,6 +160,9 @@ const reducer = (
       };
     case "SET_PUBLISHED_DATE":
       return { ...state, publishedDate: action.payload };
+
+    case "RESET":
+      return { ...state, initialState };
     default:
       return state;
   }
@@ -155,9 +173,11 @@ interface CreateProductDetailsProps {
   sizes: Tables<"sizes">[];
   posts: { name: string; image: string }[];
   categories: CategoryWithSubCategory;
+  data?: ProductsWithCategoryWithColorsWithSizes;
 }
 
 export default function CreateProductDetails({
+  data,
   colors,
   sizes,
   posts,
@@ -168,6 +188,7 @@ export default function CreateProductDetails({
 
   // Default image load
   useEffect(() => {
+    dispatch({ type: "INIT", payload: data });
     dispatch({ type: "SET_IMAGES", payload: posts });
   }, []);
 
@@ -175,12 +196,14 @@ export default function CreateProductDetails({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      salesPrice: "Rs. 100.00",
-      discount: "10%",
-      sku: "",
-      publishDate: new Date(),
+      name: data?.name || "",
+      quantity: data?.quantity || 0,
+      description: data?.description || "",
+      salesPrice: data?.salesPrice || 0,
+      discount: data?.discount || 0,
+      sku: data?.sku || "",
+      publishDate:
+        (data?.publishDate && new Date(data?.publishDate)) || new Date(),
     },
   });
 
@@ -191,12 +214,10 @@ export default function CreateProductDetails({
       category_id: categories?.id,
       productImgs,
       sub_category_id: sub_categories?.id,
-      salesPrice: extractNumber(values.salesPrice),
-      discount: extractNumber(values.discount),
     };
 
     const arrWithEmptyField = Object.entries(state).reduce(
-      (emptyValues, [key, value]) => {
+      (emptyValues, [key, value]: [string, any]) => {
         if (!Boolean(value) || value.length === 0) {
           emptyValues.push(key);
         }
@@ -240,6 +261,13 @@ export default function CreateProductDetails({
         );
         await Promise.all(sizeUpsertPromises);
 
+        // Form reset
+        form.reset({});
+        dispatch({
+          type: "RESET",
+          payload: undefined,
+        });
+
         toast.success("Product created 🎉");
       } catch (error) {
         toast.error(JSON.stringify(error));
@@ -255,10 +283,8 @@ export default function CreateProductDetails({
           {/* Layout 1*/}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-12">
             <div className="space-y-4">
-              <h2 className="text-xl text-muted-foreground underline decoration-[#074787] underline-offset-8">
-                General Information
-              </h2>
-              <div className="flex flex-col items-end gap-4 md:flex-row">
+              <h2 className="font-bold">General Information</h2>
+              <div className="flex flex-col items-center gap-4 md:flex-row">
                 <FormField
                   control={form.control}
                   name="name"
@@ -276,7 +302,7 @@ export default function CreateProductDetails({
                   control={form.control}
                   name="sku"
                   render={({ field }) => (
-                    <FormItem className="w-[100%] md:w-[30%]">
+                    <FormItem className="w-[100%] md:w-[40%]">
                       <FormLabel>SKU code*</FormLabel>
                       <FormControl>
                         <Input placeholder="123456" {...field} />
@@ -286,6 +312,23 @@ export default function CreateProductDetails({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem className="w-[40%] max-sm:w-full">
+                    <FormLabel>Quantity*</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="description"
@@ -319,15 +362,13 @@ export default function CreateProductDetails({
                               {`${state.categories.name} ↪ ${state.sub_categories.name}`}
                             </span>
                           ) : (
-                            <span>Select...</span>
+                            <span>Select a category</span>
                           )}
                         </div>
                         <ChevronDown size={18} />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-max">
-                      <DropdownMenuLabel>Category</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
                       <DropdownMenuGroup>
                         {categories.map((category) => (
                           <DropdownMenuSub key={category.id}>
@@ -400,7 +441,9 @@ export default function CreateProductDetails({
                           "flex cursor-pointer items-center gap-2 text-sm",
                           {
                             "rounded-full ring ring-orange-600 ring-offset-2":
-                              state.colors.some((item) => item.id === color.id),
+                              state.colors.some(
+                                (item: { id: number }) => item.id === color.id,
+                              ),
                           },
                         )}
                         onClick={() =>
@@ -427,7 +470,9 @@ export default function CreateProductDetails({
                           `grid h-6 w-6 cursor-pointer place-content-center rounded-full bg-zinc-300`,
                           {
                             "ring ring-orange-600 ring-offset-2":
-                              state.sizes.some((item) => item.id === size.id),
+                              state.sizes.some(
+                                (item: { id: number }) => item.id === size.id,
+                              ),
                           },
                         )}
                         onClick={() =>

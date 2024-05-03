@@ -4,13 +4,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { navItemsAdmin } from "@/lib/constant";
+import { navItemsAdmin } from "@/data/constant";
 import Link from "next/link";
 import Logo from "../logo";
 
 export default function AdminSidebar() {
   return (
-    <nav className="hidden h-screen space-y-6 border-r p-4 md:flex md:flex-col">
+    <nav className="hidden h-screen space-y-6 border-r bg-[#121621] px-2 py-4 text-white/90 xl:flex xl:flex-col">
       <Logo />
 
       <div className="flex flex-col gap-1">

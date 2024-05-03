@@ -4,18 +4,29 @@ import {
   getAllCategoriesWithSubCategories,
   getAllImages,
   getAllItemsFromDb,
+  getItemFromDb,
 } from "@/data/db";
 
 import { Tables } from "@/types/supabase";
 
-export default async function CreateProduct() {
-  const [colorsResponse, sizesResponse, imagesResponse, categoriesResponse] =
-    await Promise.all([
-      getAllItemsFromDb("color"),
-      getAllItemsFromDb("sizes"),
-      getAllImages(),
-      getAllCategoriesWithSubCategories(),
-    ]);
+export default async function EditProduct({
+  params,
+}: {
+  params: { id: number | string };
+}) {
+  const [
+    indvProductResponse,
+    colorsResponse,
+    sizesResponse,
+    imagesResponse,
+    categoriesResponse,
+  ] = await Promise.all([
+    getItemFromDb(params.id),
+    getAllItemsFromDb("color"),
+    getAllItemsFromDb("sizes"),
+    getAllImages(),
+    getAllCategoriesWithSubCategories(),
+  ]);
 
   const parsedResponse1 = JSON.parse(colorsResponse);
   if (!parsedResponse1.data) {
@@ -47,6 +58,19 @@ export default async function CreateProduct() {
     throw new Error("Failed to fetch categories data");
   }
 
+  const parsedResponse5 = JSON.parse(indvProductResponse);
+  console.log(parsedResponse5);
+  if (!parsedResponse5.data) {
+    throw new Error("Failed to fetch product data");
+  }
+  if (!!parsedResponse5.data.length) {
+    return (
+      <div className="h-100">
+        <h2 className="text-3xl italic">No product with {params.id} found</h2>
+      </div>
+    );
+  }
+
   const colors: Tables<"color">[] = parsedResponse1.data;
   const sizes: Tables<"sizes">[] = parsedResponse2.data;
   // ...
@@ -63,6 +87,7 @@ export default async function CreateProduct() {
         sizes={sizes}
         posts={posts}
         categories={categories}
+        data={parsedResponse5}
       />
     </div>
   );

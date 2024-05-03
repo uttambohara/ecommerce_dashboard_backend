@@ -7,10 +7,9 @@ import {
 } from "../routes";
 
 import { updateSession } from "./lib/supabase/middleware";
-import readUserSession from "./actions";
+import readUserSession from "./actions/read-user-session";
 
 export async function middleware(request: NextRequest) {
-  // Protected routes
   const { nextUrl } = request;
   const { data } = await readUserSession();
   const isLoggedIn = Boolean(data.session);
