@@ -9,6 +9,8 @@ import {
 
 import { Tables } from "@/types/supabase";
 
+type SubCategory = Tables<"sub-category">[];
+
 export default async function CreateProduct() {
   const user = await getUser();
   const [colorsResponse, sizesResponse, imagesResponse, categoriesResponse] =
@@ -19,44 +21,32 @@ export default async function CreateProduct() {
       getAllCategoriesWithSubCategories(),
     ]);
 
-  const parsedResponse1 = JSON.parse(colorsResponse);
-  if (!parsedResponse1.data) {
+  const colorParsed = JSON.parse(colorsResponse);
+  if (!colorParsed.data) {
     throw new Error("Failed to fetch colors data");
   }
 
-  const parsedResponse2 = JSON.parse(sizesResponse);
-  if (!parsedResponse2.data) {
+  const sizesParsed = JSON.parse(sizesResponse);
+  if (!sizesParsed.data) {
     throw new Error("Failed to fetch sizes data");
   }
 
+  // Image parsed
   const { data } = JSON.parse(imagesResponse);
   if (!data) {
     throw new Error("Failed to fetch images");
   }
 
-  // https://prgbwpzcwoxdqzqzvhdh.supabase.co/storage/v1/object/public/product_upload/photo-1713988665693-b92222aa2818.avif
-  const posts = data
-    .filter((post: any) => !post.name.includes(".emptyFolderPlaceholder"))
-    .map((post: any) => {
-      return {
-        name: post.name,
-        image: `https://prgbwpzcwoxdqzqzvhdh.supabase.co/storage/v1/object/public/product_upload/${post.name}`,
-      };
-    });
-
-  const parsedResponse4 = JSON.parse(categoriesResponse);
-  if (!parsedResponse4.data) {
+  const categoriesParsed = JSON.parse(categoriesResponse);
+  if (!categoriesParsed.data) {
     throw new Error("Failed to fetch categories data");
   }
 
-  const colors: Tables<"color">[] = parsedResponse1.data;
-  ``;
-  const sizes: Tables<"sizes">[] = parsedResponse2.data;
-  // ...
-  type SubCategory = Tables<"sub-category">[];
+  const colors: Tables<"color">[] = colorParsed.data;
+  const sizes: Tables<"sizes">[] = sizesParsed.data;
   const categories: (Tables<"category"> & {
     "sub-category": SubCategory;
-  })[] = parsedResponse4.data;
+  })[] = categoriesParsed.data;
 
   return (
     <div className="space-y-6">
@@ -64,7 +54,6 @@ export default async function CreateProduct() {
       <CreateProductDetails
         colors={colors}
         sizes={sizes}
-        posts={posts}
         categories={categories}
         user_id={user?.data?.id}
       />

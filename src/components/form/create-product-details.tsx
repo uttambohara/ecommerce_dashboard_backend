@@ -44,7 +44,7 @@ import { format } from "date-fns";
 import { CalendarIcon, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Key, useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { toast } from "sonner";
 import FileUpload from "../global/file-upload";
 import { Checkbox } from "../ui/checkbox";
@@ -167,7 +167,6 @@ const reducer = (
 interface CreateProductDetailsProps {
   colors: Tables<"color">[];
   sizes: Tables<"sizes">[];
-  posts: { name: string; image: string }[];
   categories: CategoryWithSubCategory;
   data?: ProductsWithCategoryWithColorsWithSizes;
   user_id: string | undefined;
@@ -192,7 +191,6 @@ export default function CreateProductDetails({
   data: existingData,
   colors,
   sizes,
-  posts,
   categories,
   user_id,
 }: CreateProductDetailsProps) {
@@ -200,8 +198,8 @@ export default function CreateProductDetails({
   const [state, dispatch] = useReducer(reducer, initialState);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // ...
   useEffect(() => {
-    //  INIT
     if (existingData?.id) {
       form.reset({
         name: existingData?.name || "",
@@ -227,8 +225,7 @@ export default function CreateProductDetails({
     }
   }, []);
 
-  console.log(state);
-  //...
+  // ...
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -244,6 +241,7 @@ export default function CreateProductDetails({
     },
   });
 
+  // ...
   async function onSubmit(values: FormSchema) {
     setIsUpdating(true);
     const { categories, sub_categories, productImgs, ...other } = state;
@@ -258,7 +256,7 @@ export default function CreateProductDetails({
       finalData.id = existingData.id;
     }
 
-    //...
+    // ...
     const arrWithEmptyField = Object.entries(state).reduce(
       (emptyValues, [key, value]: [string, any]) => {
         if (!Boolean(value) || value.length === 0) {
@@ -268,7 +266,6 @@ export default function CreateProductDetails({
       },
       [] as string[],
     );
-
     if (arrWithEmptyField.length > 0) {
       setIsUpdating(false);
       toast.error(
@@ -277,6 +274,7 @@ export default function CreateProductDetails({
       return;
     }
 
+    // ...
     (async () => {
       try {
         const supabase = supabaseBrowserClient();
@@ -285,15 +283,12 @@ export default function CreateProductDetails({
           .from("product")
           .upsert(finalData)
           .select();
-
         if (error) {
           toast.error(JSON.stringify(error));
           return setIsUpdating(false);
         }
         const insertedProductId = data && data[0].id;
-
         if (!existingData) {
-          // UPDATE
           const colorInsertPromises = other.colors.map(
             (color: Tables<"color">) =>
               supabase
@@ -319,6 +314,7 @@ export default function CreateProductDetails({
               .match({ product_id: existingData.id }),
           ];
           await Promise.all(productDeletes);
+
           //...
           const colorInsertPromises = other.colors.map(
             (color: Tables<"color">) =>
@@ -334,12 +330,13 @@ export default function CreateProductDetails({
           await Promise.all(colorInsertPromises.concat(sizeInsertPromises));
         }
 
-        if (!existingData?.id) form.reset();
-
-        dispatch({
-          type: "RESET",
-          payload: initialState,
-        });
+        if (!existingData?.id) {
+          form.reset();
+          dispatch({
+            type: "RESET",
+            payload: initialState,
+          });
+        }
         setIsUpdating(false);
         toast.success("Product's detail updated 🎉");
         router.refresh();
@@ -702,7 +699,6 @@ export default function CreateProductDetails({
                                     payload: post.name,
                                   });
                                   router.refresh();
-                                  // Update state
                                 }}
                               >
                                 <X size={18} />

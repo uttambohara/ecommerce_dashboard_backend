@@ -39,20 +39,12 @@ export default async function EditProduct({
   if (!sizesParsed.data) {
     throw new Error("Failed to fetch sizes data");
   }
+
+  // Image parsed
   const { data } = JSON.parse(imagesResponse);
   if (!data) {
     throw new Error("Failed to fetch images");
   }
-
-  // https://prgbwpzcwoxdqzqzvhdh.supabase.co/storage/v1/object/public/product_upload/photo-1713988665693-b92222aa2818.avif
-  const posts = data
-    .filter((post: any) => !post.name.includes(".emptyFolderPlaceholder"))
-    .map((post: any) => {
-      return {
-        name: post.name,
-        image: `https://prgbwpzcwoxdqzqzvhdh.supabase.co/storage/v1/object/public/product_upload/${post.name}`,
-      };
-    });
 
   const categoriesParsed = JSON.parse(categoriesResponse);
   if (categoriesParsed.data?.length === 0) {
@@ -63,6 +55,8 @@ export default async function EditProduct({
   if (!individualProductParsed.data) {
     throw new Error("Failed to fetch product data");
   }
+
+  // ------------------ No product found----------------------------
   if (individualProductParsed.data.length === 0) {
     return (
       <div className="h-100">
@@ -80,15 +74,12 @@ export default async function EditProduct({
     "sub-category": SubCategory;
   })[] = categoriesParsed.data;
 
-  console.log(individualProductParsed.data[0]);
-
   return (
     <div className="space-y-6">
       <MainHeader title={"Create products"} useBreadcrumb={false} />
       <CreateProductDetails
         colors={colors}
         sizes={sizes}
-        posts={posts}
         categories={categories}
         data={individualProductParsed.data[0]}
         user_id={user?.data?.id}
