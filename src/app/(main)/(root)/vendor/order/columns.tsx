@@ -200,14 +200,14 @@ export const columns: ColumnDef<Order>[] = [
                     {customer.users.full_name}
                   </div>
                 </div>
-                <hr />
+
                 <div className="flex items-center justify-between py-2">
                   <div>Address</div>
                   <div className="text-sm text-muted-foreground">
                     {customer.address}
                   </div>
                 </div>
-                <hr />
+
                 <div className="flex items-center justify-between py-2">
                   <div>Status</div>
                   <div
