@@ -17,11 +17,10 @@ import { useModal } from "@/providers/modal-provider";
 import { ProductsWithCategory } from "@/types";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Check, Clock, MoreHorizontal } from "lucide-react";
+import { Check, Clock, MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 
 export type Payment = Tables<"product">;
@@ -30,7 +29,13 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Name" />;
+      return (
+        <DataTableColumnHeader
+          column={column}
+          title="Name"
+          mainUrl="/vendor/product/list"
+        />
+      );
     },
     cell: ({ row }) => {
       const rowData = row.original as ProductsWithCategory;
@@ -62,7 +67,13 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "quantity",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Quantity" />;
+      return (
+        <DataTableColumnHeader
+          column={column}
+          title="Quantity"
+          mainUrl="/vendor/product/list"
+        />
+      );
     },
   },
   {

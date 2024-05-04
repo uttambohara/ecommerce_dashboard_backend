@@ -48,6 +48,119 @@ export type Database = {
         }
         Relationships: []
       }
+      customer: {
+        Row: {
+          created_at: string
+          id: number
+          order_id: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_order_id_fkey1"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order: {
+        Row: {
+          created_at: string
+          customer_id: number | null
+          id: number
+          order_date: string | null
+          quantity: number | null
+          status: string | null
+          total: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: number | null
+          id?: number
+          order_date?: string | null
+          quantity?: number | null
+          status?: string | null
+          total?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: number | null
+          id?: number
+          order_date?: string | null
+          quantity?: number | null
+          status?: string | null
+          total?: number | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_product: {
+        Row: {
+          created_at: string
+          id: number
+          order_id: number | null
+          product_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          product_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          order_id?: number | null
+          product_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_product_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_product_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product: {
         Row: {
           category_id: number | null

@@ -23,17 +23,19 @@ interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  mainUrl: string;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  mainUrl,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const router = useRouter();
 
-  const handleSortClick = (newSort: string, order: string) => {
-    router.push(`/vendor/product/list/?sort=${newSort}&order=${order}`);
+  const handleSortClick = (mainUrl: string, newSort: string, order: string) => {
+    router.push(`${mainUrl}/?sort=${newSort}&order=${order}`);
   };
   //
   if (!column.getCanSort() && !column.getCanHide()) {
@@ -71,7 +73,7 @@ export function DataTableColumnHeader<TData, TValue>({
             <>
               <DropdownMenuItem
                 aria-label="Sort ascending"
-                onClick={() => handleSortClick(column.id, "asc")}
+                onClick={() => handleSortClick(mainUrl, column.id, "asc")}
               >
                 <ArrowUpIcon
                   className="mr-2 size-3.5 text-muted-foreground/70"
@@ -81,7 +83,7 @@ export function DataTableColumnHeader<TData, TValue>({
               </DropdownMenuItem>
               <DropdownMenuItem
                 aria-label="Sort descending"
-                onClick={() => handleSortClick(column.id, "desc")}
+                onClick={() => handleSortClick(mainUrl, column.id, "desc")}
               >
                 <ArrowDownIcon
                   className="mr-2 size-3.5 text-muted-foreground/70"

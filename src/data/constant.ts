@@ -1,5 +1,8 @@
 import { BoxIcon, ListFilter, ReceiptText, WalletMinimal } from "lucide-react";
+
 export const DEBOUNCE_DELAY = 500;
+
+export const status = ["Pending", "Rejected", "Canceled", "Completed"];
 export const navItemsVendor = [
   {
     title: "Management",
