@@ -5,6 +5,7 @@ import {
   TableBody,
   TableCaption,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -20,36 +21,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { status } from "@/data/constant";
 import { formatCurrencyToNPR } from "@/lib/currency-formatter";
 import supabaseBrowserClient from "@/lib/supabase/supabase-client";
 import { OrderWithCustomer } from "@/types";
+import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
+import clsx from "clsx";
 import { format } from "date-fns";
 import {
   Check,
+  ChevronDown,
+  ChevronDownCircle,
   CircleX,
   Clock,
   EyeIcon,
   Loader2,
   MoreHorizontal,
   Slash,
-  X,
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Tables } from "@/types/supabase";
-import clsx from "clsx";
 
 export type Order = OrderWithCustomer;
 
@@ -105,14 +106,9 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "quantity",
-    header: ({ column }) => {
-      return (
-        <DataTableColumnHeader
-          column={column}
-          title="Quantity"
-          mainUrl="/vendor/order"
-        />
-      );
+    header: "Quantity",
+    cell: ({ row }) => {
+      return <div>{row.original.product.length}</div>;
     },
   },
   {
@@ -120,13 +116,13 @@ export const columns: ColumnDef<Order>[] = [
     header: "Total revenue",
     cell: ({ row }) => {
       const order = row.original;
-      return (
-        <div>
-          {formatCurrencyToNPR(
-            Number(order.quantity) * Number(order.product?.salesPrice),
-          )}
-        </div>
+      const allProducts = order.product;
+      const totalRevenue = allProducts.reduce(
+        (acc, product) => acc + product.salesPrice!,
+        0,
       );
+
+      return <div>{formatCurrencyToNPR(totalRevenue)}</div>;
     },
   },
   {
@@ -182,26 +178,34 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row }) => {
       const order = row.original;
       const customer = order.customer[0];
-      const imageArr: any = order.product?.productImgs;
-      const imageUrl = imageArr[0].image;
+
+      const revenueTotal = order.product.reduce(
+        (acc, product) => acc + product.salesPrice!,
+        0,
+      );
+
       return (
         <Sheet>
           <SheetTrigger>
             <EyeIcon />
           </SheetTrigger>
-          <SheetContent>
+          <SheetContent className="!w-[500px]">
             <SheetHeader>
               <SheetTitle>Details</SheetTitle>
               {/* First group */}
               <div>
                 <div className="flex items-center justify-between py-2">
                   <div>Customer</div>
-                  <div>{customer.users.full_name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {customer.users.full_name}
+                  </div>
                 </div>
                 <hr />
                 <div className="flex items-center justify-between py-2">
                   <div>Address</div>
-                  <div>{customer.address}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {customer.address}
+                  </div>
                 </div>
                 <hr />
                 <div className="flex items-center justify-between py-2">
@@ -232,40 +236,60 @@ export const columns: ColumnDef<Order>[] = [
                   <TableCaption>Line items.</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Product</TableHead>
+                      <TableHead className="w-[400px]">Product</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {order.product?.map((item: Tables<"product">) => {
+                      const imageArr: any = item?.productImgs;
+                      const imageUrl = imageArr[0].image;
+                      const productCount = order.product.filter(
+                        (product) => product.id === item.id,
+                      ).length;
+
+                      return (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-3">
+                              <div className="relative h-16 w-16">
+                                <Image
+                                  src={imageUrl}
+                                  alt={item.name as string}
+                                  fill
+                                  priority
+                                  className="rounded-full object-cover"
+                                />
+                              </div>
+                              <div className="mb-1 text-[0.9rem] font-bold">
+                                {item.name}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{productCount}</TableCell>
+                          <TableCell>
+                            {productCount * Number(item.salesPrice)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrencyToNPR(
+                              Number(productCount) * Number(item.salesPrice),
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                  <TableFooter>
                     <TableRow>
-                      <TableCell className="font-medium">
-                        <div className="flex flex-wrap items-center gap-3">
-                          <div className="relative h-12 w-12">
-                            <Image
-                              src={imageUrl}
-                              alt={order.product?.name as string}
-                              fill
-                              priority
-                              className="object-cover object-center"
-                            />
-                          </div>
-                          <div className="mb-1 text-[0.9rem] font-bold">
-                            {order.product?.name}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{order.quantity}</TableCell>
-                      <TableCell>{order.product?.salesPrice}</TableCell>
+                      <TableCell colSpan={3}>Total</TableCell>
+                      {/* TODO */}
                       <TableCell className="text-right">
-                        {formatCurrencyToNPR(
-                          Number(order.quantity) *
-                            Number(order.product?.salesPrice),
-                        )}
+                        {formatCurrencyToNPR(revenueTotal)}
                       </TableCell>
                     </TableRow>
-                  </TableBody>
+                  </TableFooter>
                 </Table>
               </div>
             </SheetHeader>
@@ -299,7 +323,7 @@ function ChangeStatusAction({ order }: { order: OrderWithCustomer }) {
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <MoreHorizontal className="h-4 w-4" />
+            <ChevronDown className="h-12 w-12" />
           )}
         </Button>
       </DropdownMenuTrigger>

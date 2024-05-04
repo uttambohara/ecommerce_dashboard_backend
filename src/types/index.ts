@@ -6,7 +6,9 @@ export type ProductsWithCategory = Tables<"product"> & {
 
 export type OrderWithCustomer = Tables<"order"> & {
   customer: (Tables<"customer"> & { users: Tables<"users"> | null })[] | any;
-} & { users: Tables<"users"> | null } & { product: Tables<"product"> | null };
+} & { users: Tables<"users"> | null } & {
+  product: Tables<"product">[];
+};
 
 export type ProductsWithCategoryWithColorsWithSizes = Tables<"product"> & {
   category: Tables<"category">;
