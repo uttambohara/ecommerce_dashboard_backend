@@ -31,7 +31,6 @@ export default async function CreateProduct() {
     throw new Error("Failed to fetch sizes data");
   }
 
-  // Image parsed
   const { data } = JSON.parse(imagesResponse);
   if (!data) {
     throw new Error("Failed to fetch images");

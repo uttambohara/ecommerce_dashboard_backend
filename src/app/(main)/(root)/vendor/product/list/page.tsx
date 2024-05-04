@@ -64,7 +64,6 @@ export default async function ProductList({
           </Button>
         </Link>
       </div>
-
       <DataTable columns={columns} data={products} />
       <PaginationControl
         route={"/vendor/product/list"}

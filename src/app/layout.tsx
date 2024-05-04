@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import { Andika } from "next/font/google";
-import "./globals.css";
 import ModalProvider from "@/providers/modal-provider";
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "./globals.css";
 
-const inter = Andika({
-  subsets: ["latin"],
-  weight: "400",
+const myFont = localFont({
+  src: "../../public/fonts/futura.woff2",
+  variable: "--font-my-custom",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={myFont.className}>
         <ModalProvider>{children}</ModalProvider>
         <Toaster position="top-right" richColors />
       </body>

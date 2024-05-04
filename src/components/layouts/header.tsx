@@ -11,7 +11,7 @@ export default function Header() {
   const router = useRouter();
 
   return (
-    <header className="flex h-[4rem] items-center justify-between bg-zinc-100 px-8 shadow-md">
+    <header className="flex h-[4rem] items-center justify-between bg-slate-100 px-8 shadow-md">
       <div className="ml-auto">
         <Button
           className="flex gap-2"
