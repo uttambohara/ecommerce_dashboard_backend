@@ -6,6 +6,7 @@ import { PER_PAGE } from "@/features/pagination/constant";
 import { supabaseServerClient } from "@/lib/supabase/supabase-server";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import StatusTabList from "./_components/status-tab-list";
 
 export default async function ProductList({
   searchParams,
@@ -21,6 +22,7 @@ export default async function ProductList({
   const limit = searchParams["limit"] ?? PER_PAGE;
   const sort = (searchParams["sort"] as string) ?? "id";
   const order = searchParams["order"] ?? "asc";
+  const status = searchParams["status"] ?? "";
 
   const start = (Number(page) - 1) * Number(limit);
   const end = start + Number(limit) - 1;
@@ -30,10 +32,14 @@ export default async function ProductList({
 
   let query = supabase
     .from("order")
-    .select("*, customer(*, users(*)), users(*)")
+    .select("*, product(*), customer(*, users(*)), users(*)")
     .order(sort, { ascending: order === "asc" })
     .eq("vendor_id", userId as string)
     .limit(PER_PAGE);
+
+  if (status && status !== "ALL") {
+    query = query.eq("status", status);
+  }
 
   const { data: allOrders } = await query;
   console.log(allOrders);
@@ -53,7 +59,11 @@ export default async function ProductList({
           className="w-[16rem] pl-8"
         />
       </div>
+
+      <StatusTabList />
+
       <DataTable columns={columns} data={orders} />
+
       <PaginationControl
         route={"/vendor/product/list"}
         totalPagesLoaded={orders?.length}

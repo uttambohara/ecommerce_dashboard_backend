@@ -50,18 +50,21 @@ export type Database = {
       }
       customer: {
         Row: {
+          address: string | null
           created_at: string
           id: number
           order_id: number | null
           user_id: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
           id?: number
           order_id?: number | null
           user_id?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
           id?: number
           order_id?: number | null
@@ -87,9 +90,9 @@ export type Database = {
       order: {
         Row: {
           created_at: string
-          customer_id: number | null
           id: number
           order_date: string | null
+          product_id: number | null
           quantity: number | null
           status: string | null
           total: number | null
@@ -97,9 +100,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          customer_id?: number | null
           id?: number
           order_date?: string | null
+          product_id?: number | null
           quantity?: number | null
           status?: string | null
           total?: number | null
@@ -107,15 +110,22 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          customer_id?: number | null
           id?: number
           order_date?: string | null
+          product_id?: number | null
           quantity?: number | null
           status?: string | null
           total?: number | null
           vendor_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "order_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_vendor_id_fkey"
             columns: ["vendor_id"]

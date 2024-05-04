@@ -6,7 +6,6 @@ import {
 } from "@radix-ui/react-icons";
 import { type Column } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,9 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import queryString from "query-string";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -33,10 +31,26 @@ export function DataTableColumnHeader<TData, TValue>({
   mainUrl,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const router = useRouter();
+  const searchParams = useSearchParams().toString();
 
   const handleSortClick = (mainUrl: string, newSort: string, order: string) => {
-    router.push(`${mainUrl}/?sort=${newSort}&order=${order}`);
+    const params = new URLSearchParams(searchParams);
+    console.log(params);
+    // Check if sort parameter already exists, replace it if it does
+    if (params.has("sort")) {
+      params.set("sort", newSort);
+    } else {
+      params.append("sort", newSort);
+    }
+    // Check if order parameter already exists, replace it if it does
+    if (params.has("order")) {
+      params.set("order", order);
+    } else {
+      params.append("order", order);
+    }
+    router.push(`${mainUrl}/?${params.toString()}`);
   };
+
   //
   if (!column.getCanSort() && !column.getCanHide()) {
     return <div className={cn(className)}>{title}</div>;

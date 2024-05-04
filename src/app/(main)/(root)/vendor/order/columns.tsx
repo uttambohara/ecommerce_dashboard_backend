@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,13 +30,26 @@ import {
   Check,
   CircleX,
   Clock,
+  EyeIcon,
   Loader2,
   MoreHorizontal,
   Slash,
+  X,
+  XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Tables } from "@/types/supabase";
+import clsx from "clsx";
 
 export type Order = OrderWithCustomer;
 
@@ -94,18 +117,16 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "total",
-    header: ({ column }) => {
-      return (
-        <DataTableColumnHeader
-          column={column}
-          title="Total Revenue"
-          mainUrl="/vendor/order"
-        />
-      );
-    },
+    header: "Total revenue",
     cell: ({ row }) => {
-      const data = row.original;
-      return <div>{formatCurrencyToNPR(Number(data.total))}</div>;
+      const order = row.original;
+      return (
+        <div>
+          {formatCurrencyToNPR(
+            Number(order.quantity) * Number(order.product?.salesPrice),
+          )}
+        </div>
+      );
     },
   },
   {
@@ -153,6 +174,104 @@ export const columns: ColumnDef<Order>[] = [
     cell: ({ row }) => {
       const order = row.original;
       return <ChangeStatusAction order={order} />;
+    },
+  },
+  {
+    id: "preview",
+    header: "Preview",
+    cell: ({ row }) => {
+      const order = row.original;
+      const customer = order.customer[0];
+      const imageArr: any = order.product?.productImgs;
+      const imageUrl = imageArr[0].image;
+      return (
+        <Sheet>
+          <SheetTrigger>
+            <EyeIcon />
+          </SheetTrigger>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Details</SheetTitle>
+              {/* First group */}
+              <div>
+                <div className="flex items-center justify-between py-2">
+                  <div>Customer</div>
+                  <div>{customer.users.full_name}</div>
+                </div>
+                <hr />
+                <div className="flex items-center justify-between py-2">
+                  <div>Address</div>
+                  <div>{customer.address}</div>
+                </div>
+                <hr />
+                <div className="flex items-center justify-between py-2">
+                  <div>Status</div>
+                  <div
+                    className={clsx(
+                      "flex items-center gap-2 rounded-full p-1 text-xs font-bold text-white ",
+                      {
+                        "bg-orange-600": order.status === "PENDING",
+                        "bg-red-600": order.status === "REJECTED",
+                        "bg-red-700": order.status === "CANCELED",
+                        "bg-green-600": order.status === "COMPLETED",
+                      },
+                    )}
+                  >
+                    {order.status === "PENDING" && <Clock />}
+                    {order.status === "REJECTED" && <Slash />}
+                    {order.status === "CANCELED" && <XCircle />}
+                    {order.status === "COMPLETED" && <Check />}
+                    {order.status}
+                  </div>
+                </div>
+              </div>
+              {/* Table */}
+              <div>
+                <SheetTitle>Line items</SheetTitle>
+                <Table>
+                  <TableCaption>Line items.</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Product</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>Unit Price</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <div className="relative h-12 w-12">
+                            <Image
+                              src={imageUrl}
+                              alt={order.product?.name as string}
+                              fill
+                              priority
+                              className="object-cover object-center"
+                            />
+                          </div>
+                          <div className="mb-1 text-[0.9rem] font-bold">
+                            {order.product?.name}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{order.quantity}</TableCell>
+                      <TableCell>{order.product?.salesPrice}</TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrencyToNPR(
+                          Number(order.quantity) *
+                            Number(order.product?.salesPrice),
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
+      );
     },
   },
 ];
