@@ -3,7 +3,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -28,23 +27,22 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { status } from "@/data/constant";
+import { SHIPPING_CHARGE, TAXES, status } from "@/data/constant";
 import { formatCurrencyToNPR } from "@/lib/currency-formatter";
 import supabaseBrowserClient from "@/lib/supabase/supabase-client";
 import { OrderWithCustomer } from "@/types";
 import { Tables } from "@/types/supabase";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { format } from "date-fns";
 import {
   Check,
   ChevronDown,
-  ChevronDownCircle,
   CircleX,
   Clock,
   EyeIcon,
   Loader2,
-  MoreHorizontal,
   Slash,
   XCircle,
 } from "lucide-react";
@@ -66,16 +64,16 @@ export const columns: ColumnDef<Order>[] = [
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative h-12 w-12">
             <Image
-              src={customer.users.avatar_url as string}
-              alt={customer.users.full_name as string}
+              src={customer.users?.avatar_url as string}
+              alt={customer.users?.full_name as string}
               fill
               priority
               className="rounded-full object-cover"
             />
           </div>
           <div>
-            <div className="font-bold">{customer.users.full_name}</div>
-            <div className="text-muted-foreground">{customer.users.email}</div>
+            <div className="font-bold">{customer.users?.full_name}</div>
+            <div className="text-muted-foreground">{customer.users?.email}</div>
           </div>
         </div>
       );
@@ -177,19 +175,26 @@ export const columns: ColumnDef<Order>[] = [
     header: "Preview",
     cell: ({ row }) => {
       const order = row.original;
-      const customer = order.customer[0];
+      const customer = order.customer?.[0];
 
       const revenueTotal = order.product.reduce(
-        (acc, product) => acc + product.salesPrice!,
+        (acc, product) =>
+          acc +
+          (product?.salesPrice! -
+            (Number(product?.discount) / 100) * Number(product?.salesPrice)),
         0,
       );
-
+      const shippingCharge = SHIPPING_CHARGE;
+      const globalDiscount = 0;
+      const taxableAmount = revenueTotal;
+      const tax = Number(((TAXES / 100) * taxableAmount).toFixed(2));
+      const totalAmount = revenueTotal + shippingCharge - globalDiscount + tax;
       return (
         <Sheet>
           <SheetTrigger>
             <EyeIcon />
           </SheetTrigger>
-          <SheetContent className="!w-[500px]">
+          <SheetContent className="!w-[550px]">
             <SheetHeader>
               <SheetTitle>Details</SheetTitle>
               {/* First group */}
@@ -197,14 +202,14 @@ export const columns: ColumnDef<Order>[] = [
                 <div className="flex items-center justify-between py-2">
                   <div>Customer</div>
                   <div className="text-sm text-muted-foreground">
-                    {customer.users.full_name}
+                    {customer?.users?.full_name}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between py-2">
                   <div>Address</div>
                   <div className="text-sm text-muted-foreground">
-                    {customer.address}
+                    {customer?.address}
                   </div>
                 </div>
 
@@ -233,12 +238,12 @@ export const columns: ColumnDef<Order>[] = [
               <div>
                 <SheetTitle>Line items</SheetTitle>
                 <Table>
-                  <TableCaption>Line items.</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[400px]">Product</TableHead>
+                      <TableHead className="w-[300px]">Product</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
+                      <TableHead>Discount</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -250,11 +255,16 @@ export const columns: ColumnDef<Order>[] = [
                         (product) => product.id === item.id,
                       ).length;
 
+                      const totalAmountAfterDiscount =
+                        Number(productCount) * Number(item?.salesPrice) -
+                        Number(productCount) *
+                          Number(item?.salesPrice) *
+                          (Number(item?.discount) / 100);
                       return (
                         <TableRow key={item.id}>
                           <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                              <div className="relative h-16 w-16">
+                            <div className="grid grid-cols-1 items-center">
+                              <div className="relative h-12 w-12">
                                 <Image
                                   src={imageUrl}
                                   alt={item.name as string}
@@ -272,10 +282,9 @@ export const columns: ColumnDef<Order>[] = [
                           <TableCell>
                             {productCount * Number(item.salesPrice)}
                           </TableCell>
+                          <TableCell>{item?.discount}%</TableCell>
                           <TableCell className="text-right">
-                            {formatCurrencyToNPR(
-                              Number(productCount) * Number(item.salesPrice),
-                            )}
+                            {formatCurrencyToNPR(totalAmountAfterDiscount)}
                           </TableCell>
                         </TableRow>
                       );
@@ -283,10 +292,37 @@ export const columns: ColumnDef<Order>[] = [
                   </TableBody>
                   <TableFooter>
                     <TableRow>
-                      <TableCell colSpan={3}>Total</TableCell>
+                      <TableCell colSpan={4}>Total</TableCell>
                       {/* TODO */}
                       <TableCell className="text-right">
-                        {formatCurrencyToNPR(revenueTotal)}
+                        <div>
+                          <div />
+                          <div className="grid gap-2">
+                            <div className="flex items-center justify-between gap-4">
+                              <div>Subtotal</div>
+                              <div> {formatCurrencyToNPR(revenueTotal)}</div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>Shipping</div>
+                              <div>{shippingCharge}</div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>Discount</div>
+                              <div>-{globalDiscount}</div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>Taxes (10%)</div>
+                              <div>{tax}</div>
+                            </div>
+                            <Separator />
+                            <div className="flex items-center justify-between font-semibold">
+                              <div>Total</div>
+                              <div>
+                                {formatCurrencyToNPR(Number(totalAmount))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   </TableFooter>
@@ -311,7 +347,7 @@ function ChangeStatusAction({ order }: { order: OrderWithCustomer }) {
         .update({ status: role })
         .eq("id", order.id)
         .select();
-      console.log(response);
+
       router.refresh();
     });
   }

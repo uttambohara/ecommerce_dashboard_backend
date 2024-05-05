@@ -5,9 +5,19 @@ export type ProductsWithCategory = Tables<"product"> & {
 };
 
 export type OrderWithCustomer = Tables<"order"> & {
-  customer: (Tables<"customer"> & { users: Tables<"users"> | null })[] | any;
+  customer: (Tables<"customer"> & { users: Tables<"users"> | null })[] | null;
 } & { users: Tables<"users"> | null } & {
   product: Tables<"product">[];
+};
+
+export type InvoiceWithOrderUsersAndPayment = Tables<"invoice"> & {
+  order: (Tables<"order"> & { product: Tables<"product">[] }) | null;
+} & {
+  users: Tables<"users"> | null;
+} & {
+  payment: Tables<"payment">[];
+} & {
+  customer: (Tables<"customer"> & { users: Tables<"users"> | null }) | null;
 };
 
 export type ProductsWithCategoryWithColorsWithSizes = Tables<"product"> & {

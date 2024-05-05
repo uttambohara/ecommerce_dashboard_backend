@@ -87,6 +87,61 @@ export type Database = {
           },
         ]
       }
+      invoice: {
+        Row: {
+          amount: number | null
+          created_at: string
+          customer_id: number | null
+          dueDate: string | null
+          id: number
+          invoice_id: string | null
+          order_id: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: number | null
+          dueDate?: string | null
+          id?: number
+          invoice_id?: string | null
+          order_id?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: number | null
+          dueDate?: string | null
+          id?: number
+          invoice_id?: string | null
+          order_id?: number | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "order"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order: {
         Row: {
           created_at: string
@@ -151,6 +206,54 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "product"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment: {
+        Row: {
+          amount: number | null
+          created_at: string
+          customer_id: number | null
+          id: number
+          invoice_id: number | null
+          method: string | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: number | null
+          id?: number
+          invoice_id?: number | null
+          method?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          customer_id?: number | null
+          id?: number
+          invoice_id?: number | null
+          method?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoice"
             referencedColumns: ["id"]
           },
         ]
@@ -343,24 +446,30 @@ export type Database = {
       }
       users: {
         Row: {
+          address: string | null
           avatar_url: string | null
           email: string
           full_name: string | null
           id: string
+          phone_number: number | null
           role: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           email: string
           full_name?: string | null
           id: string
+          phone_number?: number | null
           role?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           email?: string
           full_name?: string | null
           id?: string
+          phone_number?: number | null
           role?: string | null
         }
         Relationships: [
@@ -381,7 +490,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      payment_status: "PAID" | "CANCELED"
     }
     CompositeTypes: {
       [_ in never]: never

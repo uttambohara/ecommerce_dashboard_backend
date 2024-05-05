@@ -157,7 +157,6 @@ const reducer = (
     case "SET_PUBLISHED_DATE":
       return { ...state, publishedDate: action.payload };
     case "RESET":
-      console.log("RESETTING");
       return { ...state, ...initialState };
     default:
       return state;

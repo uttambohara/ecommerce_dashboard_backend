@@ -35,7 +35,7 @@ export function DataTableColumnHeader<TData, TValue>({
 
   const handleSortClick = (mainUrl: string, newSort: string, order: string) => {
     const params = new URLSearchParams(searchParams);
-    console.log(params);
+
     // Check if sort parameter already exists, replace it if it does
     if (params.has("sort")) {
       params.set("sort", newSort);

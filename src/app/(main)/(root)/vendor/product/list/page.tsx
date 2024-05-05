@@ -38,9 +38,6 @@ export default async function ProductList({
     .eq("user_id", userId as string)
     .limit(PER_PAGE);
 
-  const { data: allProducts } = await query;
-  const totalProducts = allProducts?.length;
-
   if (search) {
     query = query.ilike("name", `%${search}%`);
   }
@@ -48,15 +45,26 @@ export default async function ProductList({
   const { data: products, error } = await query.range(start, end);
   if (!products) throw new Error(error?.message);
 
+  let { data: allProducts } = await supabase
+    .from("product")
+    .select("*")
+    .eq("user_id", userId as string);
+
+  const totalProducts = allProducts?.length;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeader title={"Manage products"} useBreadcrumb={false} />
+      <div className="text-xl text-muted-foreground underline decoration-orange-500 underline-offset-8">
+        All products: {totalProducts}
+      </div>
       <div className="flex flex-wrap justify-between gap-2">
         <PaginationInput
           filterBy={"Entry"}
           route={"/vendor/product/list"}
           className="w-[16rem] pl-8"
         />
+
         <Link href="/vendor/product/create">
           <Button>
             <Plus size={18} />

@@ -1,7 +1,17 @@
 import { BoxIcon, ReceiptText, WalletMinimal } from "lucide-react";
 
 export const DEBOUNCE_DELAY = 500;
+export const SHIPPING_CHARGE = 100;
+export const TAXES = 10;
 
+export const invoiceStatus = [
+  "All",
+  "Pending",
+  "Overdue",
+  "Paid",
+  "Overpaid",
+  "Canceled",
+];
 export const status = ["All", "Pending", "Rejected", "Canceled", "Completed"];
 export const navItemsVendor = [
   {
