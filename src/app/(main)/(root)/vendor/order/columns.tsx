@@ -292,7 +292,7 @@ export const columns: ColumnDef<Order>[] = [
                   </TableBody>
                   <TableFooter>
                     <TableRow>
-                      <TableCell colSpan={4}>Total</TableCell>
+                      <TableCell colSpan={4}></TableCell>
                       {/* TODO */}
                       <TableCell className="text-right">
                         <div>

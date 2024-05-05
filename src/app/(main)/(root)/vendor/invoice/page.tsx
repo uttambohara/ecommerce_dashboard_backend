@@ -5,6 +5,7 @@ import PaginationInput from "@/features/pagination/components/pagination-input";
 import { PER_PAGE } from "@/features/pagination/constant";
 import { filterInvoicesByStatus } from "@/lib/payment-status-checker";
 import { supabaseServerClient } from "@/lib/supabase/supabase-server";
+import StatusCards from "./_components/status-cards";
 import StatusTabList from "./_components/status-tab-list";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -40,7 +41,7 @@ export default async function Invoice({
 
   const { data: invoices, error } = await query.range(start, end);
   if (!invoices) throw new Error(error?.message);
-  console.log(invoices);
+
   let { data: allInvoices } = await supabase
     .from("invoice")
     .select("*")
@@ -55,11 +56,11 @@ export default async function Invoice({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <SectionHeader title={"Manage Invoices"} useBreadcrumb={false} />
-      <div className="text-xl text-muted-foreground underline decoration-orange-500 underline-offset-8">
-        All invoices: {totalInvoices}
-      </div>
+      <StatusCards invoices={invoices} />
+
+      <div className="text-2xl">Invoice Table</div>
       <div className="flex flex-wrap justify-between gap-2">
         <PaginationInput
           filterBy={"Entry"}

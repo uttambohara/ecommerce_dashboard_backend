@@ -6,9 +6,9 @@ export const TAXES = 10;
 
 export const invoiceStatus = [
   "All",
+  "Paid",
   "Pending",
   "Overdue",
-  "Paid",
   "Overpaid",
   "Canceled",
 ];
