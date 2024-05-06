@@ -1,3 +1,4 @@
+import { Table } from "lucide-react";
 import { Tables } from "./supabase";
 
 export type ProductsWithCategory = Tables<"product"> & {
@@ -5,9 +6,11 @@ export type ProductsWithCategory = Tables<"product"> & {
 };
 
 export type OrderWithCustomer = Tables<"order"> & {
-  customer: (Tables<"customer"> & { users: Tables<"users"> | null })[] | null;
+  customer: any;
 } & { users: Tables<"users"> | null } & {
   product: Tables<"product">[];
+} & {
+  order_product: (Tables<"order_product"> & { product: Tables<"product">[] })[];
 };
 
 export type InvoiceWithOrderUsersAndPayment = Tables<"invoice"> & {
@@ -18,6 +21,8 @@ export type InvoiceWithOrderUsersAndPayment = Tables<"invoice"> & {
   payment: Tables<"payment">[];
 } & {
   customer: (Tables<"customer"> & { users: Tables<"users"> | null }) | null;
+} & {
+  order_product: (Tables<"order_product"> & { product: Tables<"product">[] })[];
 };
 
 export type ProductsWithCategoryWithColorsWithSizes = Tables<"product"> & {

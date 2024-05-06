@@ -31,7 +31,6 @@ import { SHIPPING_CHARGE, TAXES, status } from "@/data/constant";
 import { formatCurrencyToNPR } from "@/lib/currency-formatter";
 import supabaseBrowserClient from "@/lib/supabase/supabase-client";
 import { OrderWithCustomer } from "@/types";
-import { Tables } from "@/types/supabase";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
@@ -58,7 +57,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "Customer",
     cell: ({ row }) => {
       const data = row.original;
-      const customer = data.customer?.[0];
+      const customer = data.customer;
       if (!customer) return <div>Customer Not found!</div>;
       return (
         <div className="flex flex-wrap items-center gap-3">
@@ -106,7 +105,13 @@ export const columns: ColumnDef<Order>[] = [
     accessorKey: "quantity",
     header: "Quantity",
     cell: ({ row }) => {
-      return <div>{row.original.product.length}</div>;
+      const order = row.original;
+      const order_product = order.order_product;
+      const totalOrderedQuantity = order_product.reduce(
+        (acc, product) => acc + product.quantity!,
+        0,
+      );
+      return <div>{totalOrderedQuantity}</div>;
     },
   },
   {
@@ -114,11 +119,14 @@ export const columns: ColumnDef<Order>[] = [
     header: "Total revenue",
     cell: ({ row }) => {
       const order = row.original;
-      const allProducts = order.product;
-      const totalRevenue = allProducts.reduce(
-        (acc, product) => acc + product.salesPrice!,
-        0,
-      );
+      const order_product = order.order_product;
+      const totalRevenue = order_product.reduce((acc, item) => {
+        const totalPrice =
+          item.quantity! * item.product.salesPrice -
+          (item.product.discount / 100) *
+            (item.quantity * item.product.salesPrice);
+        return acc + totalPrice;
+      }, 0);
 
       return <div>{formatCurrencyToNPR(totalRevenue)}</div>;
     },
@@ -175,15 +183,17 @@ export const columns: ColumnDef<Order>[] = [
     header: "Preview",
     cell: ({ row }) => {
       const order = row.original;
-      const customer = order.customer?.[0];
+      console.log(order);
+      const customer = order.customer;
 
-      const revenueTotal = order.product.reduce(
-        (acc, product) =>
-          acc +
-          (product?.salesPrice! -
-            (Number(product?.discount) / 100) * Number(product?.salesPrice)),
-        0,
-      );
+      // TODO
+      const revenueTotal = order.order_product.reduce((acc, item) => {
+        const totalPrice =
+          item.quantity! * item.product.salesPrice -
+          (item.product.discount / 100) *
+            (item.quantity! * item.product.salesPrice);
+        return acc + totalPrice;
+      }, 0);
       const shippingCharge = SHIPPING_CHARGE;
       const globalDiscount = 0;
       const taxableAmount = revenueTotal;
@@ -240,7 +250,7 @@ export const columns: ColumnDef<Order>[] = [
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[300px]">Product</TableHead>
+                      <TableHead>Product</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Unit Price</TableHead>
                       <TableHead>Discount</TableHead>
@@ -248,41 +258,40 @@ export const columns: ColumnDef<Order>[] = [
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {order.product?.map((item: Tables<"product">) => {
-                      const imageArr: any = item?.productImgs;
+                    {order.order_product?.map((item) => {
+                      const imageArr: any = item?.product.productImgs;
                       const imageUrl = imageArr[0].image;
-                      const productCount = order.product.filter(
-                        (product) => product.id === item.id,
-                      ).length;
 
                       const totalAmountAfterDiscount =
-                        Number(productCount) * Number(item?.salesPrice) -
-                        Number(productCount) *
-                          Number(item?.salesPrice) *
-                          (Number(item?.discount) / 100);
+                        Number(item.quantity) *
+                          Number(item?.product.salesPrice) -
+                        Number(item.quantity) *
+                          Number(item?.product.salesPrice) *
+                          (Number(item?.product.discount) / 100);
+
                       return (
-                        <TableRow key={item.id}>
+                        <TableRow key={item.product_id}>
                           <TableCell className="font-medium">
                             <div className="grid grid-cols-1 items-center">
                               <div className="relative h-12 w-12">
                                 <Image
                                   src={imageUrl}
-                                  alt={item.name as string}
+                                  alt={item.product.name as string}
                                   fill
                                   priority
                                   className="rounded-full object-cover"
                                 />
                               </div>
                               <div className="mb-1 text-[0.9rem] font-bold">
-                                {item.name}
+                                {item.product.name}
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>{productCount}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
                           <TableCell>
-                            {productCount * Number(item.salesPrice)}
+                            {Number(item.product.salesPrice)}
                           </TableCell>
-                          <TableCell>{item?.discount}%</TableCell>
+                          <TableCell>{item?.product.discount}%</TableCell>
                           <TableCell className="text-right">
                             {formatCurrencyToNPR(totalAmountAfterDiscount)}
                           </TableCell>
@@ -365,14 +374,17 @@ function ChangeStatusAction({ order }: { order: OrderWithCustomer }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Change role</DropdownMenuLabel>
-        {status.map((role) => (
-          <DropdownMenuItem
-            key={role}
-            onClick={() => handleClick(role.toUpperCase())}
-          >
-            {role}
-          </DropdownMenuItem>
-        ))}
+        {status.map((role) => {
+          if (role.toLowerCase() === "all") return;
+          return (
+            <DropdownMenuItem
+              key={role}
+              onClick={() => handleClick(role.toUpperCase())}
+            >
+              {role}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

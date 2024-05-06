@@ -53,31 +53,21 @@ export type Database = {
           address: string | null
           created_at: string
           id: number
-          order_id: number | null
           user_id: string | null
         }
         Insert: {
           address?: string | null
           created_at?: string
           id?: number
-          order_id?: number | null
           user_id?: string | null
         }
         Update: {
           address?: string | null
           created_at?: string
           id?: number
-          order_id?: number | null
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "customer_order_id_fkey1"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "customer_user_id_fkey1"
             columns: ["user_id"]
@@ -145,29 +135,36 @@ export type Database = {
       order: {
         Row: {
           created_at: string
+          customer_id: number | null
           id: number
           order_date: string | null
-          quantity: number | null
-          status: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
           vendor_id: string | null
         }
         Insert: {
           created_at?: string
+          customer_id?: number | null
           id?: number
           order_date?: string | null
-          quantity?: number | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
           vendor_id?: string | null
         }
         Update: {
           created_at?: string
+          customer_id?: number | null
           id?: number
           order_date?: string | null
-          quantity?: number | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
           vendor_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "order_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -182,16 +179,19 @@ export type Database = {
           created_at: string
           order_id: number
           product_id: number
+          quantity: number | null
         }
         Insert: {
           created_at?: string
           order_id: number
           product_id: number
+          quantity?: number | null
         }
         Update: {
           created_at?: string
           order_id?: number
           product_id?: number
+          quantity?: number | null
         }
         Relationships: [
           {
@@ -260,49 +260,49 @@ export type Database = {
       }
       product: {
         Row: {
-          category_id: number | null
+          category_id: number
           created_at: string
-          description: string | null
-          discount: number | null
+          description: string
+          discount: number
           id: number
-          name: string | null
-          productImgs: Json | null
-          publishDate: string | null
-          quantity: number | null
-          salesPrice: number | null
-          sku: string | null
-          sub_category_id: number | null
-          user_id: string | null
+          name: string
+          productImgs: Json
+          publishDate: string
+          quantity: number
+          salesPrice: number
+          sku: string
+          sub_category_id: number
+          user_id: string
         }
         Insert: {
-          category_id?: number | null
+          category_id: number
           created_at?: string
-          description?: string | null
-          discount?: number | null
+          description: string
+          discount: number
           id?: number
-          name?: string | null
-          productImgs?: Json | null
-          publishDate?: string | null
-          quantity?: number | null
-          salesPrice?: number | null
-          sku?: string | null
-          sub_category_id?: number | null
-          user_id?: string | null
+          name: string
+          productImgs: Json
+          publishDate: string
+          quantity: number
+          salesPrice: number
+          sku: string
+          sub_category_id: number
+          user_id: string
         }
         Update: {
-          category_id?: number | null
+          category_id?: number
           created_at?: string
-          description?: string | null
-          discount?: number | null
+          description?: string
+          discount?: number
           id?: number
-          name?: string | null
-          productImgs?: Json | null
-          publishDate?: string | null
-          quantity?: number | null
-          salesPrice?: number | null
-          sku?: string | null
-          sub_category_id?: number | null
-          user_id?: string | null
+          name?: string
+          productImgs?: Json
+          publishDate?: string
+          quantity?: number
+          salesPrice?: number
+          sku?: string
+          sub_category_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -490,6 +490,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      order_status: "PENDING" | "REJECTED" | "CANCELED" | "COMPLETED"
       payment_status: "PAID" | "CANCELED"
     }
     CompositeTypes: {

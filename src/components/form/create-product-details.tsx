@@ -664,7 +664,7 @@ export default function CreateProductDetails({
                   <div>
                     {state.productImgs.length === 0 && (
                       <div className="text-center italic">
-                        <h3 className="mt-6 text-2xl text-muted-foreground underline decoration-orange-400 underline-offset-8">
+                        <h3 className="mt-6 text-muted-foreground underline decoration-orange-400 underline-offset-8">
                           No images uploaded for display!
                         </h3>
                       </div>

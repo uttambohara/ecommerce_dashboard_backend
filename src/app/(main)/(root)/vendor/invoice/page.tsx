@@ -18,6 +18,7 @@ export default async function Invoice({
   const user = await getUser();
   const userId = user?.data?.id;
 
+  const search = searchParams["search"];
   const page = searchParams["page"] ?? 1;
   const limit = searchParams["limit"] ?? PER_PAGE;
   const sort = (searchParams["sort"] as string) ?? "id";
@@ -47,6 +48,10 @@ export default async function Invoice({
     .select("*")
     .eq("vendor_id", userId as string);
   const totalInvoices = allInvoices?.length;
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
 
   let filteredInvoice;
   if (status == "ALL") {

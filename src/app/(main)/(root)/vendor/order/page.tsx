@@ -31,10 +31,16 @@ export default async function ProductList({
 
   let query = supabase
     .from("order")
-    .select("*, product(*), customer(*, users(*)), users(*)")
+    .select(
+      "*, product(*), customer(*, users(*)), users(*), order_product(*, product(*))",
+    )
     .order(sort, { ascending: order === "asc" })
     .eq("vendor_id", userId as string)
     .limit(PER_PAGE);
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
 
   if (status && status !== "ALL") {
     query = query.eq("status", status);
@@ -49,6 +55,8 @@ export default async function ProductList({
     .eq("vendor_id", userId as string);
 
   const totalOrders = allOrders?.length;
+
+  console.log({ orders });
 
   return (
     <div className="space-y-6">
