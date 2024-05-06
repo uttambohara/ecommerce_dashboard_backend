@@ -51,9 +51,9 @@ export default async function ProductList({
   const totalOrders = allOrders?.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <SectionHeader title={"Manage orders"} useBreadcrumb={false} />
-      <div className="text-xl text-muted-foreground underline decoration-orange-500 underline-offset-8">
+      <div className="text-xl text-muted-foreground">
         All orders: {totalOrders}
       </div>
       <div className="flex flex-wrap justify-between gap-2">

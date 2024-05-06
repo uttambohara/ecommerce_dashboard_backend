@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/sonner";
 import ModalProvider from "@/providers/modal-provider";
 import type { Metadata } from "next";
-import { Andika } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Andika({
+const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "700"],
   display: "swap",

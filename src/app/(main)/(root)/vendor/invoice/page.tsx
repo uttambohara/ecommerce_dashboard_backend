@@ -57,8 +57,10 @@ export default async function Invoice({
 
   return (
     <div className="space-y-6">
-      <SectionHeader title={"Manage Invoices"} useBreadcrumb={false} />
-      <StatusCards invoices={invoices} />
+      <div>
+        <SectionHeader title={"Manage Invoices"} useBreadcrumb={false} />
+        <StatusCards invoices={invoices} />
+      </div>
 
       <div className="text-2xl">Invoice Table</div>
       <div className="flex flex-wrap justify-between gap-2">

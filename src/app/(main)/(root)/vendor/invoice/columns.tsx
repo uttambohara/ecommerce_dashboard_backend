@@ -225,7 +225,7 @@ export const columns: ColumnDef<Payment>[] = [
                 <SheetTitle className="text-3xl">
                   Invoice {invoice.invoice_id}
                 </SheetTitle>
-                <SheetDescription>
+                <SheetDescription className="text-md">
                   Issued on {format(invoice.created_at!, "yyyy MMM dd")} <br />
                   {format(invoice.created_at!, "hh:MM aaaa")}
                 </SheetDescription>
@@ -234,7 +234,7 @@ export const columns: ColumnDef<Payment>[] = [
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
                     <h3 className="mb-2 text-2xl font-semibold">Vendor</h3>
-                    <div className="grid gap-2 text-sm">
+                    <div className="grid gap-2 border-r text-sm">
                       <div>{invoice.users?.full_name}</div>
                       <div>{invoice.users?.address}</div>
                       <div>+977 {invoice.users?.phone_number}</div>
@@ -249,24 +249,6 @@ export const columns: ColumnDef<Payment>[] = [
                       <div>+977 {invoice.customer?.users?.phone_number}</div>
                       <div>{invoice.customer?.users?.email}</div>
                     </div>
-                  </div>
-                </div>
-                <div className="text-2xl">
-                  <div
-                    className={clsx("-rotate-1 underline underline-offset-8", {
-                      "decoration-orange-500": dueAmount > 0,
-                      "decoration-green-500": dueAmount === 0,
-                    })}
-                  >
-                    {dueAmount > 0 ? (
-                      <div>
-                        {" "}
-                        {formatCurrencyToNPR(dueAmount)} due on{" "}
-                        {format(invoice.dueDate!, "yyyy MMM dd")}
-                      </div>
-                    ) : (
-                      "Fully paid, print the receipt"
-                    )}
                   </div>
                 </div>
                 <div>
@@ -353,6 +335,22 @@ export const columns: ColumnDef<Payment>[] = [
                     </div>
                   </div>
                 </div>
+              </div>
+              <div
+                className={clsx(
+                  "text-right text-sm underline underline-offset-8",
+                )}
+              >
+                {dueAmount > 0 ? (
+                  <div>
+                    {formatCurrencyToNPR(dueAmount)}, due on{" "}
+                    {format(invoice.dueDate!, "yyyy MMM dd")}
+                  </div>
+                ) : (
+                  <div>
+                    <div>Fully paid, print the receipt</div>
+                  </div>
+                )}
               </div>
               <SheetFooter className="flex justify-end gap-2">
                 <Button variant="outline">Print</Button>

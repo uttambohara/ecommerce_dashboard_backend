@@ -55,7 +55,7 @@ export default async function ProductList({
   return (
     <div className="space-y-4">
       <SectionHeader title={"Manage products"} useBreadcrumb={false} />
-      <div className="text-xl text-muted-foreground underline decoration-orange-500 underline-offset-8">
+      <div className="text-xl text-muted-foreground">
         All products: {totalProducts}
       </div>
       <div className="flex flex-wrap justify-between gap-2">

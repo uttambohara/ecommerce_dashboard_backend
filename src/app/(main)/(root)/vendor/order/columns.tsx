@@ -226,10 +226,10 @@ export const columns: ColumnDef<Order>[] = [
                       },
                     )}
                   >
-                    {order.status === "PENDING" && <Clock />}
-                    {order.status === "REJECTED" && <Slash />}
-                    {order.status === "CANCELED" && <XCircle />}
-                    {order.status === "COMPLETED" && <Check />}
+                    {order.status === "PENDING" && <Clock size={16} />}
+                    {order.status === "REJECTED" && <Slash size={16} />}
+                    {order.status === "CANCELED" && <XCircle size={16} />}
+                    {order.status === "COMPLETED" && <Check size={16} />}
                     {order.status}
                   </div>
                 </div>

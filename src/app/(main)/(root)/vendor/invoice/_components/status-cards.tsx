@@ -9,6 +9,7 @@ import {
   Check,
   Clock,
   MailWarningIcon,
+  Paperclip,
   Slash,
 } from "lucide-react";
 
@@ -62,28 +63,23 @@ export default function StatusCards({ invoices }: StatusCardsProps) {
     }
   }, 0);
 
+  const showCards = [
+    { type: "total", number: totalInvoices, total: totalRevenue }, // total
+    totalPaid,
+    totalPending,
+  ];
+
   return (
     <section className="w-full">
-      <div>
-        <div className="text-xl">
-          Total Revenue:{" "}
-          <span className="text-2xl font-bold">
-            {formatCurrencyToNPR(totalRevenue)}
-          </span>
-        </div>
-        <div className="text-muted-foreground">
-          from {totalInvoices} invoices.
-        </div>
-      </div>
       <div className="flex gap-4 overflow-x-auto p-4 md:px-0">
-        {allCards.map((card, i) => (
+        {showCards.map((card, i) => (
           <Card
             key={i}
-            className="w-[230px] flex-shrink-0 overflow-hidden rounded-lg p-4 shadow-lg"
+            className="w-[350px] flex-shrink-0 overflow-hidden rounded-lg p-4"
           >
-            <div className="flex items-start gap-2">
+            <div className="flex items-center gap-4">
               <div
-                className={clsx("rounded-full", {
+                className={clsx("rounded-full p-3 shadow-md", {
                   "text-orange-600": card.type === "pending",
                   "text-red-600": card.type === "overdue",
                   "text-green-600": card.type === "paid",
@@ -91,6 +87,7 @@ export default function StatusCards({ invoices }: StatusCardsProps) {
                   "bg-red-700 text-white": card.type === "canceled",
                 })}
               >
+                {card.type === "total" && <Paperclip />}
                 {card.type === "pending" && <Clock />}
                 {card.type === "overdue" && <AlertCircle />}
                 {card.type === "paid" && <Check />}
@@ -98,13 +95,13 @@ export default function StatusCards({ invoices }: StatusCardsProps) {
                 {card.type === "canceled" && <Slash />}
               </div>
               <div>
-                <div>
+                <div className="text-muted-foreground">
                   {card.type.charAt(0).toUpperCase() + card.type.slice(1)}
                 </div>
-                <div className="text-2xl font-semibold">
+                <div className="text-[1.2rem] font-semibold">
                   {formatCurrencyToNPR(card.total)}
                 </div>
-                <div className="text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   from {card.number} {card.number > 1 ? "invoices" : "invoice"}
                 </div>
               </div>
